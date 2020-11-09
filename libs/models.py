@@ -1,0 +1,357 @@
+"""
+-----------> MODELS <-----------
+"""
+
+from libs import basic_shapes as bs, transformations as tr, easy_shaders as es, scene_graph as sg
+import numpy as np
+from OpenGL.GL import *
+import random as rd
+from typing import Union
+
+
+class Game(object):
+    def __init__(self, n):
+        self.size = n
+        self.grid = 1 / n
+        self.center = tuple(int(n / 2) for _ in range(2))
+        self.time = 1 / np.log(n)
+        self.resize = n / (n + 2)
+        self.count_food = 0
+        self.empty = set()
+        for i in range(0, self.size):
+            for j in range(0, self.size):
+                self.empty.add((i, j))
+        self.empty -= {self.center}
+        self.win = False
+        self.dead = False
+        self.pause = True
+        self.speed = False
+        self.time_pause = 0
+        self.notFood = False
+
+    def set_speed(self, s):
+        self.time = s * 1 / np.log(self.size)
+
+    def update(self):
+        self.pause = False
+        self.win = False
+        self.dead = False
+        self.speed = False
+        self.notFood = False
+
+
+class Snake(object):
+    game: Union['Game', None]
+    food: Union['Food', None]
+
+    def __init__(self, game, food):
+        self.food = food
+        self.game = game
+        self.pos = game.center
+        self.view_pos = get_pos(game.grid, game.size, self.pos)
+        self.dir = 0, 0
+        self.key = 0, 0
+        self.tail = []
+        self.angle = {
+            (0, 0): np.pi / 2,
+            (-1, 0): np.pi / 2,
+            (1, 0): -np.pi / 2,
+            (0, -1): 0,
+            (0, 1): np.pi
+        }
+
+        gpu_head_quad = es.toGPUShape(bs.createTextureQuad("libs/fig/head.png"), GL_REPEAT,
+                                      GL_NEAREST)
+
+        head = sg.SceneGraphNode('head')
+        head.transform = tr.uniformScale(1.8 * game.grid)
+        head.childs += [gpu_head_quad]
+
+        head_tr = sg.SceneGraphNode('head_tr')
+        head_tr.transform = tr.identity()
+        head_tr.childs += [head]
+
+        body = sg.SceneGraphNode('body')
+        body.transform = tr.identity()
+        body.childs += [head_tr]
+
+        body_tr = sg.SceneGraphNode('body_tr')
+        body_tr.transform = tr.identity()
+        body_tr.childs += [body]
+
+        self.body = body
+        self.model = body_tr
+        self.head = head_tr
+        self.bodySnake = bodySnake(self)
+
+        self.g_resize = self.game.resize
+        self.g_grid = self.game.grid
+        self.g_size = self.game.size
+        self.g_center = self.game.center
+
+    def draw(self, pipeline):
+        self.model.transform = tr.uniformScale(self.g_resize)
+        self.head.transform = tr.matmul([
+            tr.translate(
+                tx=self.view_pos[0],
+                ty=self.view_pos[1],
+                tz=0
+            ),
+            tr.rotationZ(self.angle[self.dir])
+        ])
+        sg.drawSceneGraphNode(self.model, pipeline, 'transform')
+
+    def update(self):
+        if not self.game.pause:
+            self.tail.append(self.pos)
+            self.tail.pop(0)
+
+            if sum([self.dir[i] * self.key[i] for i in range(2)]) == 0:
+                self.dir = self.key
+
+            self.pos = tuple(sum(i) for i in zip(self.pos, self.dir))
+            self.view_pos = get_pos(self.g_grid, self.g_size, self.pos)
+            self.bodySnake.update(self.tail)
+        if self.game.notFood:
+            self.game.win = True
+
+    def set_key(self, k):
+        self.key = k
+
+    def collide(self):
+        if not (self.game.win or self.game.pause):
+            if not self.pos[0] in set(range(0, self.g_size)) or \
+                    not self.pos[1] in set(range(0, self.g_size)) \
+                    or (self.pos in self.tail):
+                self.dead()
+            if self.pos == self.food.pos:
+                self.eat()
+
+    def eat(self):
+        self.tail = [None] + self.tail
+        self.food.update(self)
+        self.game.count_food += 1
+        self.bodySnake.new(self.pos)
+
+    def dead(self):
+        self.pos = self.g_center
+        self.view_pos = get_pos(self.g_grid, self.g_size, self.pos)
+        self.dir = 0, 0
+        self.key = 0, 0
+        self.game.count_food = 0
+        self.tail = []
+        self.body.childs = [self.head]
+        self.bodySnake.death()
+        self.food.update(self)
+        if not (self.game.notFood or self.game.pause):
+            self.game.dead = True
+
+
+class bodyCreator(object):
+    game: Union['Game', None]
+
+    def __init__(self, game, body, pos):
+        self.game = game
+        view_pos = get_pos(game.grid, game.size, pos)
+
+        gpu_body_quad = es.toGPUShape(bs.createTextureQuad("libs/fig/body.png"), GL_REPEAT,
+                                      GL_NEAREST)
+
+        body_sh = sg.SceneGraphNode('body_sh')
+        body_sh.transform = tr.uniformScale(1.8 * game.grid)
+        body_sh.childs += [gpu_body_quad]
+
+        body_sh_tr = sg.SceneGraphNode(f'body_sh_tr_{game.count_food}')
+        body_sh_tr.transform = tr.translate(
+            tx=view_pos[0],
+            ty=view_pos[1],
+            tz=0
+        )
+        body_sh_tr.childs += [body_sh]
+
+        body.childs = [body_sh_tr] + body.childs
+
+        self.model = body_sh_tr
+        self.g_grid = self.game.grid
+        self.g_size = self.game.size
+
+    def update(self, pos):
+        view_pos = get_pos(self.g_grid, self.g_size, pos)
+        self.model.transform = tr.translate(
+            tx=view_pos[0],
+            ty=view_pos[1],
+            tz=0)
+
+
+class bodySnake(object):
+    game: Union['Game', None]
+    snake: Union['Snake', None]
+
+    def __init__(self, snake):
+        self.snake = snake
+        self.game = snake.game
+        self.body = snake.body
+        self.list = []
+
+    def new(self, pos):
+        self.list.append(bodyCreator(self.game, self.body, pos))
+
+    def update(self, tail):
+        for i in range(self.game.count_food):
+            self.list[i].update(tail[i])
+
+    def death(self):
+        self.list = []
+
+
+class Food(object):
+    snake: Union['Snake', None]
+
+    def __init__(self, game):
+        self.game = game
+        self.pos = tuple(rd.randint(0, game.size - 1) for _ in range(2))
+        self.view_pos = get_pos(game.grid, game.size, self.pos)
+
+        gpu_food_quad = es.toGPUShape(bs.createColorQuad(217 / 255, 17 / 255, 17 / 255))
+        gpu_leaves_quad = es.toGPUShape(bs.createColorQuad(67 / 255, 140 / 255, 15 / 255))
+        gpu_stick_quad = es.toGPUShape(bs.createColorQuad(100 / 255, 0 / 255, 0 / 255))
+
+        food = sg.SceneGraphNode('food')
+        food.transform = tr.matmul([
+            tr.rotationZ(0),
+            tr.uniformScale(4 / 4 * game.grid)
+        ])
+        food.childs += [gpu_food_quad]
+
+        leaves = sg.SceneGraphNode('leaves')
+        leaves.transform = tr.matmul([
+            tr.translate(1 * game.grid / 8, 6 * game.grid / 8, 0),
+            tr.rotationZ(np.pi / 2),
+            tr.scale(1 / 8 * game.grid, 3 / 8 * game.grid, 1),
+            tr.rotationZ(np.pi / 4)
+        ])
+        leaves.childs += [gpu_leaves_quad]
+
+        stick = sg.SceneGraphNode('stick')
+        stick.transform = tr.matmul([
+            tr.translate(0, 2 * game.grid / 4, 0),
+            tr.scale(1 / 16 * game.grid, 4 / 8 * game.grid, 1),
+            tr.rotationZ(np.pi / 2)
+        ])
+        stick.childs += [gpu_stick_quad]
+
+        food_tr = sg.SceneGraphNode('food_tr')
+        food_tr.transform = tr.identity()
+        food_tr.childs += [stick, leaves, food]
+
+        self.model = food_tr
+        self.g_resize = self.game.resize
+        self.g_grid = self.game.grid
+        self.g_size = self.game.size
+
+    def draw(self, pipeline, theta):
+        self.model.transform = tr.matmul([
+            tr.uniformScale(self.g_resize),
+            tr.translate(
+                tx=self.view_pos[0],
+                ty=self.view_pos[1],
+                tz=0),
+            tr.rotationZ(theta)
+        ])
+        sg.drawSceneGraphNode(self.model, pipeline, 'transform')
+
+    def update(self, snake):
+        choice = self.game.empty - set(snake.tail) - {snake.pos}
+        if choice != set():
+            self.pos = rd.choice(list(choice))
+            self.view_pos = get_pos(self.g_grid, self.g_size, self.pos)
+        else:
+            self.game.notFood = True
+
+
+class Background(object):
+    def __init__(self, game):
+        self.game = game
+
+        gpu_BG_quad = es.toGPUShape(bs.createColorQuad(232 / 255, 232 / 255, 232 / 255))
+
+        BG = sg.SceneGraphNode('BG')
+        BG.transform = tr.uniformScale(2)
+        BG.childs += [gpu_BG_quad]
+
+        BG_tr = sg.SceneGraphNode('BG_tr')
+        BG_tr.transform = tr.identity()
+        BG_tr.childs += [BG]
+
+        self.model = BG_tr
+        self.g_resize = self.game.resize
+
+    def draw(self, pipeline):
+        self.model.transform = tr.uniformScale(self.g_resize)
+        sg.drawSceneGraphNode(self.model, pipeline, 'transform')
+
+
+class interactiveWindow(object):
+    def __init__(self):
+        gpu_deadW_quad = es.toGPUShape(bs.createTextureQuad("libs/fig/dead.png"), GL_REPEAT,
+                                       GL_NEAREST)
+        gpu_pauseW_quad = es.toGPUShape(bs.createTextureQuad("libs/fig/pause.png"), GL_REPEAT,
+                                        GL_NEAREST)
+        gpu_winW_quad = es.toGPUShape(bs.createTextureQuad("libs/fig/win.png"), GL_REPEAT,
+                                      GL_NEAREST)
+        gpu_speedW_quad = es.toGPUShape(bs.createTextureQuad("libs/fig/speed.png"), GL_REPEAT,
+                                        GL_NEAREST)
+
+        deadW = sg.SceneGraphNode('deadW')
+        deadW.transform = tr.uniformScale(1)
+        deadW.childs += [gpu_deadW_quad]
+
+        deadW_tr = sg.SceneGraphNode('deadW_tr')
+        deadW_tr.transform = tr.identity()
+        deadW_tr.childs += [deadW]
+
+        pauseW = sg.SceneGraphNode('pauseW')
+        pauseW.transform = tr.uniformScale(1)
+        pauseW.childs += [gpu_pauseW_quad]
+
+        pauseW_tr = sg.SceneGraphNode('pauseW_tr')
+        pauseW_tr.transform = tr.identity()
+        pauseW_tr.childs += [pauseW]
+
+        winW = sg.SceneGraphNode('deadW')
+        winW.transform = tr.uniformScale(1)
+        winW.childs += [gpu_winW_quad]
+
+        winW_tr = sg.SceneGraphNode('deadW_tr')
+        winW_tr.transform = tr.identity()
+        winW_tr.childs += [winW]
+
+        speedW = sg.SceneGraphNode('speedW')
+        speedW.transform = tr.uniformScale(1)
+        speedW.childs += [gpu_speedW_quad]
+
+        speedW_tr = sg.SceneGraphNode('speedW_tr')
+        speedW_tr.transform = tr.identity()
+        speedW_tr.childs += [speedW]
+
+        self.models = {'dead': deadW_tr, 'pause': pauseW_tr, 'win': winW_tr, 'speed': speedW_tr}
+
+    def draw(self, pipeline, theta, mod):
+        model = self.models[mod]
+        model.transform = tr.matmul([
+            tr.uniformScale(theta / np.pi),
+            tr.translate(
+                tx=0,
+                ty=0,
+                tz=0),
+            tr.rotationZ(theta)
+        ])
+        sg.drawSceneGraphNode(model, pipeline, 'transform')
+
+
+def get_pos(grid, size, pos):
+    return tuple(
+        grid * ((size - 1) * (-1) ** (i + 1)
+                + 2 * pos[i] * (-1) ** i)
+        for i in range(2)
+    )
