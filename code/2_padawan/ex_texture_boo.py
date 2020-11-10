@@ -77,7 +77,7 @@ if __name__ == "__main__":
 
     # Creating shapes on GPU memory
     gpuBoo = es.toGPUShape(bs.createTextureQuad("boo.png"), GL_REPEAT, GL_NEAREST)
-    gpuQuestionBox = es.toGPUShape(bs.createTextureQuad("question_box.png",10,1), GL_REPEAT, GL_NEAREST)
+    gpuQuestionBox = es.toGPUShape(bs.createTextureQuad("question_box.png", 10, 1), GL_REPEAT, GL_NEAREST)
 
     questionBoxTransform = np.matmul(tr.translate(0, -0.8, 0), tr.scale(2, 0.2, 1))
 

@@ -28,9 +28,27 @@ class Game(object):
         self.speed = False
         self.time_pause = 0
         self.notFood = False
+        # module: game-time
+        self.t = 0
+        self.dt = 0
+        self.count = 0
 
     def set_speed(self, s):
         self.time = s * 1 / np.log(self.size)
+
+    def post_time(self, t0):
+        self.dt = t0 - self.t
+        self.t = t0
+
+    def check_time(self):
+        if self.count * self.dt > self.time:
+            self.count = 0
+            return True
+        else:
+            return False
+
+    def count_time(self):
+        self.count += 1
 
     def update(self):
         self.pause = False
@@ -63,7 +81,7 @@ class Snake(object):
         gpu_head_quad = es.toGPUShape(bs.createColorCube(0, 1, 0))
 
         head = sg.SceneGraphNode('head')
-        head.transform = tr.uniformScale(1.8 * game.grid)
+        head.transform = tr.uniformScale(1 * game.grid) # 1.8
         head.childs += [gpu_head_quad]
 
         head_tr = sg.SceneGraphNode('head_tr')
@@ -276,6 +294,7 @@ class Background(object):
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
         sg.drawSceneGraphNode(self.model, pipeline)
 
+
 class interactiveWindow(object):
     def __init__(self):
         gpu_deadW_quad = es.toGPUShape(bs.createTextureQuad("libs/fig/dead.png"), GL_REPEAT,
@@ -348,7 +367,9 @@ class Axis(object):
 
 def get_pos(grid, size, pos):
     return tuple(
-        grid * ((size - 1) * (-1) ** (i + 1)
-                + 2 * pos[i] * (-1) ** i)
-        for i in range(2)
-    )
+            grid * ((size - 1) * (-1) ** (t + 1)
+                    + 2 * pos[t] * (-1) ** t)
+            for t in range(2))
+
+
+
