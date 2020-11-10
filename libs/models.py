@@ -101,7 +101,7 @@ class Snake(object):
         glUseProgram(pipeline.shaderProgram)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
-        sg.drawSceneGraphNode(self.model, pipeline, 'model')
+        sg.drawSceneGraphNode(self.model, pipeline)
 
     def update(self):
         if not self.game.pause:
@@ -242,7 +242,7 @@ class Food(object):
         glUseProgram(pipeline.shaderProgram)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
-        sg.drawSceneGraphNode(self.model, pipeline, 'model')
+        sg.drawSceneGraphNode(self.model, pipeline)
 
     def update(self, snake):
         choice = self.game.empty - set(snake.tail) - {snake.pos}
@@ -254,17 +254,16 @@ class Food(object):
 
 
 class Background(object):
-    def __init__(self, game):
+    def __init__(self, game, image):
         self.game = game
 
-        gpu_BG_quad = es.toGPUShape(bs.createTextureQuad('code/2_padawan/bricks.jpg'), GL_REPEAT, GL_LINEAR)
+        gpu_BG_quad = es.toGPUShape(bs.createTextureQuad(image, game.size, game.size), GL_REPEAT, GL_LINEAR)
 
         BG = sg.SceneGraphNode('BG')
-        BG.transform = tr.scale(2, 2, 2)
+        BG.transform = tr.uniformScale(2)
         BG.childs += [gpu_BG_quad]
 
         BG_tr = sg.SceneGraphNode('BG_tr')
-        BG_tr.transform = tr.identity()
         BG_tr.childs += [BG]
 
         self.model = BG_tr
@@ -272,10 +271,10 @@ class Background(object):
 
     def draw(self, pipeline, projection, view):
         self.model.transform = tr.uniformScale(self.g_resize)
+        glUseProgram(pipeline.shaderProgram)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
-        sg.drawSceneGraphNode(self.model, pipeline, 'model')
-
+        sg.drawSceneGraphNode(self.model, pipeline)
 
 class interactiveWindow(object):
     def __init__(self):

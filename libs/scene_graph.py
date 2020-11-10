@@ -74,8 +74,8 @@ def findPosition(node, name, parentTransform=tr.identity()):
     return None
 
 
-def drawSceneGraphNode(node, pipeline, transformName, parentTransform=tr.identity()):
-    assert(isinstance(node, SceneGraphNode))
+def drawSceneGraphNode(node, pipeline, parentTransform=tr.identity()):
+    # assert (isinstance(node, SceneGraphNode))
 
     # Composing the transformations through this path
     newTransform = np.matmul(parentTransform, node.transform)
@@ -84,12 +84,12 @@ def drawSceneGraphNode(node, pipeline, transformName, parentTransform=tr.identit
     # Hence, it can be drawn with drawShape
     if len(node.childs) == 1 and isinstance(node.childs[0], es.GPUShape):
         leaf = node.childs[0]
-        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, transformName), 1, GL_TRUE, newTransform)
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE, newTransform)
         pipeline.drawShape(leaf)
 
     # If the child node is not a leaf, it MUST be a SceneGraphNode,
     # so this draw function is called recursively
     else:
         for child in node.childs:
-            drawSceneGraphNode(child, pipeline, transformName, newTransform)
+            drawSceneGraphNode(child, pipeline, newTransform)
 
