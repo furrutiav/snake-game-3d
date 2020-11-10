@@ -72,7 +72,6 @@ class Controller(object):
                 self.game.time_pause = 0
         else:
             if not self.game.lock:
-                self.game.lock = True
                 if key == glfw.KEY_LEFT or key == glfw.KEY_A:
                     self.snake.set_key(self.dirs[key])
 
@@ -84,6 +83,7 @@ class Controller(object):
 
                 elif key == glfw.KEY_DOWN or key == glfw.KEY_S:
                     self.snake.set_key(self.dirs[key])
+
             else:
                 if key == glfw.KEY_ESCAPE:
                     self.game.pause = True

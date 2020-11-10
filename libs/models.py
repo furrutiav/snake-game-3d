@@ -14,7 +14,7 @@ class Game(object):
         self.size = n
         self.grid = 1 / n
         self.center = tuple(int(n / 2) for _ in range(2))
-        self.time = 1 / np.log(n)
+        self.time = 1 / np.log(n) * [1, 10][0]
         self.resize = n / (n + 2)
         self.count_food = 0
         self.empty = set()
@@ -39,15 +39,10 @@ class Game(object):
         self.time = s * 1 / np.log(self.size)
 
     def post_time(self, t0):
-        self.dt = 0.0001
+        self.dt = [0.01, (self.dt + t0 - self.t + 0.002) / 3][1]
         self.t = t0
 
     def check_time(self):
-        if self.count * self.dt / self.time < 1/2:
-            self.lock = True
-        else:
-            self.lock = False
-
         if self.count * self.dt > self.time:
             self.count = 0
             return True
@@ -114,8 +109,9 @@ class Snake(object):
         self.g_center = self.game.center
 
     def draw(self, pipeline, projection, view):
+        # tuple(sum(i) for i in zip(self.pos, self.dir))
         view_pos = get_pos(self.g_grid, self.g_size, self.pos,
-                           tuple(sum(i) for i in zip(self.pos, self.dir)), self.game.count, self.game.time / self.game.dt)
+                           self.view_pos, self.dir, self.key, self.game.count, self.game.time / self.game.dt)
         self.model.transform = tr.uniformScale(self.g_resize)
         self.head.transform = tr.matmul([
             tr.translate(
@@ -131,13 +127,11 @@ class Snake(object):
         sg.drawSceneGraphNode(self.model, pipeline)
 
     def update(self):
+        self.game.lock = False
         if not self.game.pause:
             self.tail.append(self.pos)
             self.tail.pop(0)
-
-            if sum([self.dir[i] * self.key[i] for i in range(2)]) == 0:
-                self.dir = self.key
-
+            self.dir = self.key
             self.pos = tuple(sum(i) for i in zip(self.pos, self.dir))
             self.view_pos = get_pos(self.g_grid, self.g_size, self.pos)
             self.bodySnake.update(self.tail)
@@ -145,7 +139,9 @@ class Snake(object):
             self.game.win = True
 
     def set_key(self, k):
-        self.key = k
+        if self.is_new_dir(k):
+            self.key = k
+            self.game.lock = True
 
     def collide(self):
         if not (self.game.win or self.game.pause):
@@ -174,6 +170,9 @@ class Snake(object):
         self.food.update(self)
         if not (self.game.notFood or self.game.pause):
             self.game.dead = True
+
+    def is_new_dir(self, k):
+        return sum([self.dir[i] * k[i] for i in range(2)]) == 0
 
 
 class bodyCreator(object):
@@ -374,20 +373,23 @@ class Axis(object):
         pipeline.drawShape(self.model, GL_LINES)
 
 
-def get_pos(grid, size, pos, next=None, i=0, m=1):
-    new_pos = tuple(
+def get_pos(grid, size, pos, current=None, dir=None, key=None, i=0, m=1):
+    if current is None:
+        new_pos = tuple(
             grid * ((size - 1) * (-1) ** (t + 1)
                     + 2 * pos[t] * (-1) ** t)
             for t in range(2))
-    if i == 0:
+
         return new_pos
     else:
+        next = tuple(sum(t) for t in zip(pos, key))
         next_pos = tuple(
             grid * ((size - 1) * (-1) ** (t + 1)
                     + 2 * next[t] * (-1) ** t)
             for t in range(2))
         return tuple(
-            next_pos[t] * (i / m) + new_pos[t] * (1 - i / m)
+            next_pos[t] * (i / m) + current[t] * (1 - i / m)
             for t in range(2))
+
 
 

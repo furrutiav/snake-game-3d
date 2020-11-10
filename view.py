@@ -49,18 +49,18 @@ if __name__ == '__main__':
     ratio = 16/9
     projection = tr.ortho(-1*ratio, 1*ratio, -1, 1, 0.1, 1000)
 
-    view1 = tr.lookAt(
+    view0 = tr.lookAt(
         np.array([10, -10, 10]),
         np.array([0, 0, 0]),
         np.array([0, 0, 1])
     )
 
-    view = tr.lookAt(
+    view1 = tr.lookAt(
         np.array([0, 0, 10]),
         np.array([0, 0, 0]),
         np.array([0, 1, 0])
     )
-
+    view = [view0, view1][1]
     while not glfw.window_should_close(window):
         ti = glfw.get_time()
         game.post_time(ti)
