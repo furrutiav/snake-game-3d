@@ -60,8 +60,7 @@ class Snake(object):
             (0, 1): np.pi
         }
 
-        gpu_head_quad = es.toGPUShape(bs.createTextureQuad("libs/fig/head.png"), GL_REPEAT,
-                                      GL_NEAREST)
+        gpu_head_quad = es.toGPUShape(bs.createColorCube(0, 1, 0))
 
         head = sg.SceneGraphNode('head')
         head.transform = tr.uniformScale(1.8 * game.grid)
@@ -89,7 +88,7 @@ class Snake(object):
         self.g_size = self.game.size
         self.g_center = self.game.center
 
-    def draw(self, pipeline):
+    def draw(self, pipeline, projection, view):
         self.model.transform = tr.uniformScale(self.g_resize)
         self.head.transform = tr.matmul([
             tr.translate(
@@ -99,7 +98,10 @@ class Snake(object):
             ),
             tr.rotationZ(self.angle[self.dir])
         ])
-        sg.drawSceneGraphNode(self.model, pipeline, 'transform')
+        glUseProgram(pipeline.shaderProgram)
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
+        sg.drawSceneGraphNode(self.model, pipeline, 'model')
 
     def update(self):
         if not self.game.pause:
@@ -154,11 +156,10 @@ class bodyCreator(object):
         self.game = game
         view_pos = get_pos(game.grid, game.size, pos)
 
-        gpu_body_quad = es.toGPUShape(bs.createTextureQuad("libs/fig/body.png"), GL_REPEAT,
-                                      GL_NEAREST)
+        gpu_body_quad = es.toGPUShape(bs.createColorCube(0, 1, 1))
 
         body_sh = sg.SceneGraphNode('body_sh')
-        body_sh.transform = tr.uniformScale(1.8 * game.grid)
+        body_sh.transform = tr.uniformScale(1.7 * game.grid)
         body_sh.childs += [gpu_body_quad]
 
         body_sh_tr = sg.SceneGraphNode(f'body_sh_tr_{game.count_food}')
@@ -168,7 +169,6 @@ class bodyCreator(object):
             tz=0
         )
         body_sh_tr.childs += [body_sh]
-
         body.childs = [body_sh_tr] + body.childs
 
         self.model = body_sh_tr
@@ -212,44 +212,25 @@ class Food(object):
         self.pos = tuple(rd.randint(0, game.size - 1) for _ in range(2))
         self.view_pos = get_pos(game.grid, game.size, self.pos)
 
-        gpu_food_quad = es.toGPUShape(bs.createColorQuad(217 / 255, 17 / 255, 17 / 255))
-        gpu_leaves_quad = es.toGPUShape(bs.createColorQuad(67 / 255, 140 / 255, 15 / 255))
-        gpu_stick_quad = es.toGPUShape(bs.createColorQuad(100 / 255, 0 / 255, 0 / 255))
+        gpu_food_quad = es.toGPUShape(bs.createColorCube(1, 0, 0))
 
         food = sg.SceneGraphNode('food')
-        food.transform = tr.matmul([
-            tr.rotationZ(0),
-            tr.uniformScale(4 / 4 * game.grid)
-        ])
+        food.transform = tr.uniformScale(1/8 * game.resize)
         food.childs += [gpu_food_quad]
 
-        leaves = sg.SceneGraphNode('leaves')
-        leaves.transform = tr.matmul([
-            tr.translate(1 * game.grid / 8, 6 * game.grid / 8, 0),
-            tr.rotationZ(np.pi / 2),
-            tr.scale(1 / 8 * game.grid, 3 / 8 * game.grid, 1),
-            tr.rotationZ(np.pi / 4)
-        ])
-        leaves.childs += [gpu_leaves_quad]
-
-        stick = sg.SceneGraphNode('stick')
-        stick.transform = tr.matmul([
-            tr.translate(0, 2 * game.grid / 4, 0),
-            tr.scale(1 / 16 * game.grid, 4 / 8 * game.grid, 1),
-            tr.rotationZ(np.pi / 2)
-        ])
-        stick.childs += [gpu_stick_quad]
-
         food_tr = sg.SceneGraphNode('food_tr')
-        food_tr.transform = tr.identity()
-        food_tr.childs += [stick, leaves, food]
+        food_tr.transform = tr.translate(
+                tx=self.view_pos[0],
+                ty=self.view_pos[1],
+                tz=0)
+        food_tr.childs += [food]
 
         self.model = food_tr
         self.g_resize = self.game.resize
         self.g_grid = self.game.grid
         self.g_size = self.game.size
 
-    def draw(self, pipeline, theta):
+    def draw(self, pipeline, projection, view, theta):
         self.model.transform = tr.matmul([
             tr.uniformScale(self.g_resize),
             tr.translate(
@@ -258,7 +239,10 @@ class Food(object):
                 tz=0),
             tr.rotationZ(theta)
         ])
-        sg.drawSceneGraphNode(self.model, pipeline, 'transform')
+        glUseProgram(pipeline.shaderProgram)
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
+        sg.drawSceneGraphNode(self.model, pipeline, 'model')
 
     def update(self, snake):
         choice = self.game.empty - set(snake.tail) - {snake.pos}
@@ -347,6 +331,18 @@ class interactiveWindow(object):
             tr.rotationZ(theta)
         ])
         sg.drawSceneGraphNode(model, pipeline, 'transform')
+
+
+class Axis(object):
+    def __init__(self, len):
+        self.model = es.toGPUShape(bs.createAxis(len))
+
+    def draw(self, pipeline, projection, view):
+        glUseProgram(pipeline.shaderProgram)
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
+        pipeline.drawShape(self.model, GL_LINES)
 
 
 def get_pos(grid, size, pos):
