@@ -14,7 +14,7 @@ class Game(object):
         self.size = n
         self.grid = 1 / n
         self.center = tuple(int(n / 2) for _ in range(2))
-        self.time = 1 / np.log(n) * [1, 10][0]
+        self.time = 1 / np.log(n) * [1, 10][1]
         self.resize = n / (n + 2)
         self.count_food = 0
         self.empty = set()
@@ -39,7 +39,7 @@ class Game(object):
         self.time = s * 1 / np.log(self.size)
 
     def post_time(self, t0):
-        self.dt = [0.01, (self.dt + t0 - self.t + 0.002) / 3][1]
+        self.dt = [0.005, (self.dt + t0 - self.t + 0.002) / 3][0]
         self.t = t0
 
     def check_time(self):
@@ -71,6 +71,7 @@ class Snake(object):
         self.view_pos = get_pos(game.grid, game.size, self.pos)
         self.dir = 0, 0
         self.key = 0, 0
+        self.next = tuple(sum(t) for t in zip(self.pos, self.dir))
         self.tail = []
         self.angle = {
             (0, 0): np.pi / 2,
@@ -109,9 +110,8 @@ class Snake(object):
         self.g_center = self.game.center
 
     def draw(self, pipeline, projection, view):
-        # tuple(sum(i) for i in zip(self.pos, self.dir))
-        view_pos = get_pos(self.g_grid, self.g_size, self.pos,
-                           self.view_pos, self.dir, self.key, self.game.count, self.game.time / self.game.dt)
+        view_pos = get_pos(self.g_grid, self.g_size, self.pos, self.next,
+                           self.view_pos, self.game.count, self.game.time / self.game.dt)
         self.model.transform = tr.uniformScale(self.g_resize)
         self.head.transform = tr.matmul([
             tr.translate(
@@ -127,12 +127,13 @@ class Snake(object):
         sg.drawSceneGraphNode(self.model, pipeline)
 
     def update(self):
-        self.game.lock = False
         if not self.game.pause:
+            self.game.lock = False
             self.tail.append(self.pos)
             self.tail.pop(0)
             self.dir = self.key
-            self.pos = tuple(sum(i) for i in zip(self.pos, self.dir))
+            self.pos = self.next
+            self.next = tuple(sum(t) for t in zip(self.pos, self.dir))
             self.view_pos = get_pos(self.g_grid, self.g_size, self.pos)
             self.bodySnake.update(self.tail)
         if self.game.notFood:
@@ -163,6 +164,7 @@ class Snake(object):
         self.view_pos = get_pos(self.g_grid, self.g_size, self.pos)
         self.dir = 0, 0
         self.key = 0, 0
+        self.next = tuple(sum(t) for t in zip(self.pos, self.dir))
         self.game.count_food = 0
         self.tail = []
         self.body.childs = [self.head]
@@ -373,16 +375,13 @@ class Axis(object):
         pipeline.drawShape(self.model, GL_LINES)
 
 
-def get_pos(grid, size, pos, current=None, dir=None, key=None, i=0, m=1):
+def get_pos(grid, size, pos, next=None, current=None, i=0, m=1):
     if current is None:
-        new_pos = tuple(
+        return tuple(
             grid * ((size - 1) * (-1) ** (t + 1)
                     + 2 * pos[t] * (-1) ** t)
             for t in range(2))
-
-        return new_pos
     else:
-        next = tuple(sum(t) for t in zip(pos, key))
         next_pos = tuple(
             grid * ((size - 1) * (-1) ** (t + 1)
                     + 2 * next[t] * (-1) ** t)
@@ -390,6 +389,3 @@ def get_pos(grid, size, pos, current=None, dir=None, key=None, i=0, m=1):
         return tuple(
             next_pos[t] * (i / m) + current[t] * (1 - i / m)
             for t in range(2))
-
-
-
