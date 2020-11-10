@@ -32,15 +32,22 @@ class Game(object):
         self.t = 0
         self.dt = 0
         self.count = 0
+        # key-lock
+        self.lock = False
 
     def set_speed(self, s):
         self.time = s * 1 / np.log(self.size)
 
     def post_time(self, t0):
-        self.dt = t0 - self.t
+        self.dt = 0.0001
         self.t = t0
 
     def check_time(self):
+        if self.count * self.dt / self.time < 1/2:
+            self.lock = True
+        else:
+            self.lock = False
+
         if self.count * self.dt > self.time:
             self.count = 0
             return True
@@ -107,11 +114,13 @@ class Snake(object):
         self.g_center = self.game.center
 
     def draw(self, pipeline, projection, view):
+        view_pos = get_pos(self.g_grid, self.g_size, self.pos,
+                           tuple(sum(i) for i in zip(self.pos, self.dir)), self.game.count, self.game.time / self.game.dt)
         self.model.transform = tr.uniformScale(self.g_resize)
         self.head.transform = tr.matmul([
             tr.translate(
-                tx=self.view_pos[0],
-                ty=self.view_pos[1],
+                tx=view_pos[0],
+                ty=view_pos[1],
                 tz=1.8*self.game.grid / 2
             ),
             tr.rotationZ(self.angle[self.dir])
@@ -365,11 +374,20 @@ class Axis(object):
         pipeline.drawShape(self.model, GL_LINES)
 
 
-def get_pos(grid, size, pos):
-    return tuple(
+def get_pos(grid, size, pos, next=None, i=0, m=1):
+    new_pos = tuple(
             grid * ((size - 1) * (-1) ** (t + 1)
                     + 2 * pos[t] * (-1) ** t)
             for t in range(2))
-
+    if i == 0:
+        return new_pos
+    else:
+        next_pos = tuple(
+            grid * ((size - 1) * (-1) ** (t + 1)
+                    + 2 * next[t] * (-1) ** t)
+            for t in range(2))
+        return tuple(
+            next_pos[t] * (i / m) + new_pos[t] * (1 - i / m)
+            for t in range(2))
 
 

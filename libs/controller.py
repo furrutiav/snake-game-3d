@@ -71,17 +71,19 @@ class Controller(object):
                 self.game.update()
                 self.game.time_pause = 0
         else:
-            if key == glfw.KEY_LEFT or key == glfw.KEY_A:
-                self.snake.set_key(self.dirs[key])
+            if not self.game.lock:
+                self.game.lock = True
+                if key == glfw.KEY_LEFT or key == glfw.KEY_A:
+                    self.snake.set_key(self.dirs[key])
 
-            elif key == glfw.KEY_RIGHT or key == glfw.KEY_D:
-                self.snake.set_key(self.dirs[key])
+                elif key == glfw.KEY_RIGHT or key == glfw.KEY_D:
+                    self.snake.set_key(self.dirs[key])
 
-            elif key == glfw.KEY_UP or key == glfw.KEY_W:
-                self.snake.set_key(self.dirs[key])
+                elif key == glfw.KEY_UP or key == glfw.KEY_W:
+                    self.snake.set_key(self.dirs[key])
 
-            elif key == glfw.KEY_DOWN or key == glfw.KEY_S:
-                self.snake.set_key(self.dirs[key])
-
-            elif key == glfw.KEY_ESCAPE:
-                self.game.pause = True
+                elif key == glfw.KEY_DOWN or key == glfw.KEY_S:
+                    self.snake.set_key(self.dirs[key])
+            else:
+                if key == glfw.KEY_ESCAPE:
+                    self.game.pause = True
