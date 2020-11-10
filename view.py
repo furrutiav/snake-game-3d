@@ -14,9 +14,8 @@ if __name__ == '__main__':
     if not glfw.init():
         sys.exit()
 
-    width = 800
-    height = 800
-
+    width = int(1920 * 0.7)
+    height = int(1080 * 0.7)
     window = glfw.create_window(width, height, 'Snake Game 3D; Autor: Felipe Urrutia V.', None, None)
 
     if not window:
@@ -37,7 +36,6 @@ if __name__ == '__main__':
     glClearColor(48/255, 48/255, 48/255, 1.0)
 
     glEnable(GL_DEPTH_TEST)
-    # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     bg = Background(game)
     food = Food(game)
@@ -49,7 +47,8 @@ if __name__ == '__main__':
 
     axis = Axis(100)
 
-    projection = tr.ortho(-1, 1, -1, 1, 0.1, 1000)
+    ratio = 16/9
+    projection = tr.ortho(-1*ratio, 1*ratio, -1, 1, 0.1, 1000)
 
     view = tr.lookAt(
         np.array([10, -10, 10]),
@@ -107,10 +106,10 @@ if __name__ == '__main__':
 
         axis.draw(pipeline_col, projection, view)
 
-        # bg.draw(pipeline_pol)
+        bg.draw(pipeline_tx, projection, view)
+
         food.draw(pipeline_col, projection, view, ti)
 
-        # glUseProgram(pipeline_tx.shaderProgram)
         snake.draw(pipeline_col, projection, view)
 
         if t * dt > game.time:

@@ -94,7 +94,7 @@ class Snake(object):
             tr.translate(
                 tx=self.view_pos[0],
                 ty=self.view_pos[1],
-                tz=0
+                tz=1.8*self.game.grid / 2
             ),
             tr.rotationZ(self.angle[self.dir])
         ])
@@ -156,7 +156,7 @@ class bodyCreator(object):
         self.game = game
         view_pos = get_pos(game.grid, game.size, pos)
 
-        gpu_body_quad = es.toGPUShape(bs.createColorCube(0, 1, 1))
+        gpu_body_quad = es.toGPUShape(bs.createColorCube(0, 0.8, 0))
 
         body_sh = sg.SceneGraphNode('body_sh')
         body_sh.transform = tr.uniformScale(1.7 * game.grid)
@@ -166,7 +166,7 @@ class bodyCreator(object):
         body_sh_tr.transform = tr.translate(
             tx=view_pos[0],
             ty=view_pos[1],
-            tz=0
+            tz=1.7*self.game.grid / 2
         )
         body_sh_tr.childs += [body_sh]
         body.childs = [body_sh_tr] + body.childs
@@ -180,7 +180,7 @@ class bodyCreator(object):
         self.model.transform = tr.translate(
             tx=view_pos[0],
             ty=view_pos[1],
-            tz=0)
+            tz=1.7*self.game.grid / 2)
 
 
 class bodySnake(object):
@@ -215,7 +215,7 @@ class Food(object):
         gpu_food_quad = es.toGPUShape(bs.createColorCube(1, 0, 0))
 
         food = sg.SceneGraphNode('food')
-        food.transform = tr.uniformScale(1/8 * game.resize)
+        food.transform = tr.uniformScale(1 * game.grid)
         food.childs += [gpu_food_quad]
 
         food_tr = sg.SceneGraphNode('food_tr')
@@ -236,7 +236,7 @@ class Food(object):
             tr.translate(
                 tx=self.view_pos[0],
                 ty=self.view_pos[1],
-                tz=0),
+                tz=self.game.grid / 2),
             tr.rotationZ(theta)
         ])
         glUseProgram(pipeline.shaderProgram)
@@ -257,10 +257,10 @@ class Background(object):
     def __init__(self, game):
         self.game = game
 
-        gpu_BG_quad = es.toGPUShape(bs.createColorQuad(232 / 255, 232 / 255, 232 / 255))
+        gpu_BG_quad = es.toGPUShape(bs.createTextureQuad('code/2_padawan/bricks.jpg'), GL_REPEAT, GL_LINEAR)
 
         BG = sg.SceneGraphNode('BG')
-        BG.transform = tr.uniformScale(2)
+        BG.transform = tr.scale(2, 2, 2)
         BG.childs += [gpu_BG_quad]
 
         BG_tr = sg.SceneGraphNode('BG_tr')
@@ -270,9 +270,11 @@ class Background(object):
         self.model = BG_tr
         self.g_resize = self.game.resize
 
-    def draw(self, pipeline):
+    def draw(self, pipeline, projection, view):
         self.model.transform = tr.uniformScale(self.g_resize)
-        sg.drawSceneGraphNode(self.model, pipeline, 'transform')
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
+        sg.drawSceneGraphNode(self.model, pipeline, 'model')
 
 
 class interactiveWindow(object):
