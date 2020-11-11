@@ -2,7 +2,6 @@
 -----------> MODELS <-----------
 """
 
-import glfw
 from libs import basic_shapes as bs, transformations as tr, easy_shaders as es, scene_graph as sg
 import numpy as np
 from OpenGL.GL import *
@@ -93,7 +92,7 @@ class Snake(object):
         gpu_head_quad = es.toGPUShape(bs.createColorCube(0, 1, 0))
 
         head = sg.SceneGraphNode('head')
-        head.transform = tr.uniformScale(1.8 * game.grid) # 1.8
+        head.transform = tr.uniformScale(1.8 * game.grid)   # 1.8
         head.childs += [gpu_head_quad]
 
         head_tr = sg.SceneGraphNode('head_tr')
@@ -121,7 +120,8 @@ class Snake(object):
     def draw(self, pipeline, projection, view):
         view_pos = get_pos(self.g_grid, self.g_size, self.pos, self.next,
                            self.current_pos, i=self.game.count, m=self.game.time / self.game.dt)
-        theta = get_theta(self.theta, self.new_theta, i=self.game.count - self.t0, m=self.game.time / self.game.dt - self.t0)
+        theta = get_theta(self.theta, self.new_theta, i=self.game.count - self.t0,
+                          m=self.game.time / self.game.dt - self.t0)
         self.view_pos = view_pos
         self.game.cam_angle = theta
         self.model.transform = tr.uniformScale(self.g_resize)
@@ -424,23 +424,24 @@ class Cam(object):
 
     def get_cam_gta(self):
         self.view_gta = tr.lookAt(
-                np.array([10*np.sin(self.game.cam_angle) + self.snake.view_pos[0], -10*np.cos(self.game.cam_angle) + self.snake.view_pos[1], 5]),
+                np.array([10*np.sin(self.game.cam_angle) + self.snake.view_pos[0],
+                          -10*np.cos(self.game.cam_angle) + self.snake.view_pos[1], 5]),
                 np.array([self.snake.view_pos[i] for i in range(2)]+[1.8*self.game.grid / 2]),
                 np.array([0, 0, 1]))
         return self.projection[2], self.view_gta
 
     def get_cam(self):
-        if self.status == 'R':
+        if self.status == 'R':  # gta
             return self.get_cam_gta()
 
-        elif self.status == 'T':
+        elif self.status == 'T':    # perspective
             return self.projection[1], self.view[2]
 
-        elif self.status == 'E':
+        elif self.status == 'E':    # map
             return self.projection[0], self.view[1]
 
 
-def get_pos(grid, size, pos, next=None, current=None, i=0, m=1):
+def get_pos(grid, size, pos, next_pos = None, current = None, i = 0, m = 1):
     if current is None:
         return tuple(
             grid * ((size - 1) * (-1) ** (t + 1)
@@ -449,17 +450,17 @@ def get_pos(grid, size, pos, next=None, current=None, i=0, m=1):
     else:
         next_pos = tuple(
             grid * ((size - 1) * (-1) ** (t + 1)
-                    + 2 * next[t] * (-1) ** t)
+                    + 2 * next_pos[t] * (-1) ** t)
             for t in range(2))
         return tuple(
             next_pos[t] * (i / m) + current[t] * (1 - i / m)
             for t in range(2))
 
 
-def get_theta(theta_1, theta_2, i=0, m=1):
+def get_theta(theta_1, theta_2, i = 0, m = 1):
     if theta_1 == 0 and theta_2 == 3 * np.pi / 2:
         return (i / m) * (-np.pi / 2) + (1 - i / m) * theta_1
     elif theta_2 == 0 and theta_1 == 3 * np.pi / 2:
-        return (i / m) * (2*np.pi) + (1 - i / m) * theta_1
+        return (i / m) * (2 * np.pi) + (1 - i / m) * theta_1
     else:
-        return (i / m)*theta_2 + (1 - i / m)*theta_1
+        return (i / m) * theta_2 + (1 - i / m) * theta_1

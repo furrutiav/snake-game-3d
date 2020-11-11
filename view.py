@@ -1,7 +1,7 @@
 """
 -----------> VIEW <-----------
 """
-
+import glfw
 import sys
 from libs.models import *
 from libs.controller import Controller
@@ -14,7 +14,8 @@ if __name__ == '__main__':
 
     width = int(1920 * 0.7)
     height = int(1080 * 0.7)
-    window = glfw.create_window(width, height, 'Snake Game 3D; Autor: Felipe Urrutia V.', None, None)
+    window = glfw.create_window(
+        width, height, 'Snake Game 3D; Autor: Felipe Urrutia V.', None, None)
 
     if not window:
         glfw.terminate()
@@ -86,8 +87,6 @@ if __name__ == '__main__':
         #         else:
         #             game.time_pause = 2*np.pi
         # else:
-
-        # projection, view = cam.get_cam_gta()
 
         projection, view = cam.get_cam()
 
