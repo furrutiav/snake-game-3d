@@ -6,7 +6,7 @@ import sys
 from libs.models import *
 from libs.controller import Controller
 
-N = 10  # int(sys.argv[1])
+N = 20  # int(sys.argv[1])
 
 if __name__ == '__main__':
     if not glfw.init():
@@ -39,50 +39,15 @@ if __name__ == '__main__':
     food = Food(game)
     snake = Snake(game, food)
     iW = interactiveWindow()
+    cam = Cam(snake, game)
 
     controller.set_snake(snake)
     controller.set_game(game)
+    controller.set_cam(cam)
 
     axis = Axis(100)
 
-    ratio = 16/9
-
-    projection0 = tr.ortho(-1*ratio, 1*ratio, -1, 1, 0.1, 1000)
-
-    projection1 = tr.perspective(2*np.pi, ratio, 0.1, 1000)
-
-    projection2 = tr.perspective(1.5*np.pi, ratio, 0.1, 1000)
-
-    view0 = tr.lookAt(
-        np.array([10, -10, 10]),
-        np.array([0, 0, 0]),
-        np.array([0, 0, 1])
-    )
-
-    view1 = tr.lookAt(
-        np.array([0, 0, 10]),
-        np.array([0, 0, 0]),
-        np.array([0, 1, 0])
-    )
-
-    view2 = tr.lookAt(
-        np.array([0, -10, 10]),
-        np.array([0, 0, 0]),
-        np.array([0, 0, 1])
-    )
-
-    view = [view0, view1, view2][0]
-    projection = [projection0, projection1, projection2][2]
-
     while not glfw.window_should_close(window):
-        theta = game.cam_angle
-        pos = snake.view_pos
-
-        view = tr.lookAt(
-            np.array([15*np.sin(theta) + snake.view_pos[0], -15*np.cos(theta) + snake.view_pos[1], 10]),
-            np.array([snake.view_pos[i] for i in range(2)]+[1.8*game.grid / 2]),
-            np.array([0, 0, 1])
-        )
 
         ti = glfw.get_time()
         game.post_time(ti)
@@ -121,6 +86,10 @@ if __name__ == '__main__':
         #         else:
         #             game.time_pause = 2*np.pi
         # else:
+
+        # projection, view = cam.get_cam_gta()
+
+        projection, view = cam.get_cam()
 
         axis.draw(pipeline_col, projection, view)
 

@@ -15,7 +15,7 @@ class Game(object):
         self.size = n
         self.grid = 1 / n
         self.center = tuple(int(n / 2) for _ in range(2))
-        self.time = 1 / np.log(n) * [1, 10, 5][2]
+        self.time = 1 / np.log(n) * [2, 10, 5][0]
         self.resize = n / (n + 2)
         self.count_food = 0
         self.empty = set()
@@ -390,6 +390,54 @@ class Axis(object):
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
         pipeline.drawShape(self.model, GL_LINES)
+
+
+class Cam(object):
+    game: Union['Game', None]
+    snake: Union['Snake', None]
+
+    def __init__(self, s, g):
+        self.snake = s
+        self.game = g
+        self.status = 'R'
+        ratio = 16/9
+        self.projection = [
+            tr.ortho(-1 * ratio, 1 * ratio, -1, 1, 0.1, 1000),
+            tr.perspective(2 * np.pi, ratio, 0.1, 1000),
+            tr.perspective(1.5 * np.pi, ratio, 0.1, 1000)
+        ]
+        self.view = [
+            tr.lookAt(
+                np.array([10, -10, 10]),
+                np.array([0, 0, 0]),
+                np.array([0, 0, 1])),
+            tr.lookAt(
+                np.array([0, 0, 10]),
+                np.array([0, 0, 0]),
+                np.array([0, 1, 0])),
+            tr.lookAt(
+                np.array([0, -10, 10]),
+                np.array([0, 0, 0]),
+                np.array([0, 0, 1]))
+        ]
+        self.view_gta = None
+
+    def get_cam_gta(self):
+        self.view_gta = tr.lookAt(
+                np.array([10*np.sin(self.game.cam_angle) + self.snake.view_pos[0], -10*np.cos(self.game.cam_angle) + self.snake.view_pos[1], 5]),
+                np.array([self.snake.view_pos[i] for i in range(2)]+[1.8*self.game.grid / 2]),
+                np.array([0, 0, 1]))
+        return self.projection[2], self.view_gta
+
+    def get_cam(self):
+        if self.status == 'R':
+            return self.get_cam_gta()
+
+        elif self.status == 'T':
+            return self.projection[1], self.view[2]
+
+        elif self.status == 'E':
+            return self.projection[0], self.view[1]
 
 
 def get_pos(grid, size, pos, next=None, current=None, i=0, m=1):

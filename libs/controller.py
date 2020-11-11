@@ -9,10 +9,13 @@ from typing import Union
 
 class Controller(object):
     snake: Union['Snake', None]
+    game: Union['Game', None]
+    cam: Union['Cam', None]
 
     def __init__(self):
         self.snake = None
         self.game = None
+        self.cam = None
         self.dirs = {
             glfw.KEY_A: (-1, 0),
             glfw.KEY_D: (1, 0),
@@ -32,6 +35,9 @@ class Controller(object):
 
     def set_game(self, g):
         self.game = g
+
+    def set_cam(self, c):
+        self.cam = c
 
     def on_key(self, window, key, scancode, action, mods):
         if not (action == glfw.PRESS) or (action == glfw.RELEASE):
@@ -72,24 +78,38 @@ class Controller(object):
                 self.snake.dead()
                 self.game.update()
                 self.game.time_pause = 0
+
         else:
             if not self.game.lock:
-                if key == glfw.KEY_LEFT or key == glfw.KEY_A:
-                    # self.snake.set_key(self.dirs[key])
-                    self.count = (4 + self.count - 1) % 4
-                    self.snake.set_key(self.clock[self.count])
+                if self.cam.status == 'R':
+                    if key == glfw.KEY_LEFT or key == glfw.KEY_A:
+                        self.count = (4 + self.count - 1) % 4
+                        self.snake.set_key(self.clock[self.count])
 
-                elif key == glfw.KEY_RIGHT or key == glfw.KEY_D:
-                    # self.snake.set_key(self.dirs[key])
-                    self.count = (self.count + 1) % 4
-                    self.snake.set_key(self.clock[self.count])
+                    elif key == glfw.KEY_RIGHT or key == glfw.KEY_D:
+                        self.count = (self.count + 1) % 4
+                        self.snake.set_key(self.clock[self.count])
+                else:
+                    if key == glfw.KEY_LEFT or key == glfw.KEY_A:
+                        self.snake.set_key(self.dirs[key])
 
-                elif key == glfw.KEY_UP or key == glfw.KEY_W:
-                    self.snake.set_key(self.dirs[key])
+                    elif key == glfw.KEY_RIGHT or key == glfw.KEY_D:
+                        self.snake.set_key(self.dirs[key])
 
-                elif key == glfw.KEY_DOWN or key == glfw.KEY_S:
-                    self.snake.set_key(self.dirs[key])
+                    elif key == glfw.KEY_UP or key == glfw.KEY_W:
+                        self.snake.set_key(self.dirs[key])
 
-            else:
-                if key == glfw.KEY_ESCAPE:
-                    self.game.pause = True
+                    elif key == glfw.KEY_DOWN or key == glfw.KEY_S:
+                        self.snake.set_key(self.dirs[key])
+
+            if key == glfw.KEY_R:
+                self.cam.status = 'R'
+
+            elif key == glfw.KEY_E:
+                self.cam.status = 'E'
+
+            elif key == glfw.KEY_T:
+                self.cam.status = 'T'
+
+            elif key == glfw.KEY_ESCAPE:
+                self.game.pause = True
