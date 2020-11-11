@@ -27,7 +27,7 @@ class Controller(object):
             glfw.KEY_UP: (0, -1),
             glfw.KEY_DOWN: (0, 1),
         }
-        self.clock = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+        self.clock = {0: (0, -1), 1: (1, 0), 2: (0, 1), 3: (-1, 0)}
         self.count = 0
 
     def set_snake(self, s):
@@ -102,13 +102,14 @@ class Controller(object):
                     elif key == glfw.KEY_DOWN or key == glfw.KEY_S:
                         self.snake.set_key(self.dirs[key])
 
-            if key == glfw.KEY_R:
+            if key == glfw.KEY_R and self.cam.status != 'R':
+                self.count = dict(zip(self.clock.values(), self.clock.keys()))[self.snake.key]
                 self.cam.status = 'R'
 
-            elif key == glfw.KEY_E:
+            elif key == glfw.KEY_E and self.cam.status != 'E':
                 self.cam.status = 'E'
 
-            elif key == glfw.KEY_T:
+            elif key == glfw.KEY_T and self.cam.status != 'T':
                 self.cam.status = 'T'
 
             elif key == glfw.KEY_ESCAPE:
