@@ -24,6 +24,8 @@ class Controller(object):
             glfw.KEY_UP: (0, -1),
             glfw.KEY_DOWN: (0, 1),
         }
+        self.clock = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+        self.count = 0
 
     def set_snake(self, s):
         self.snake = s
@@ -73,10 +75,14 @@ class Controller(object):
         else:
             if not self.game.lock:
                 if key == glfw.KEY_LEFT or key == glfw.KEY_A:
-                    self.snake.set_key(self.dirs[key])
+                    # self.snake.set_key(self.dirs[key])
+                    self.count = (4 + self.count - 1) % 4
+                    self.snake.set_key(self.clock[self.count])
 
                 elif key == glfw.KEY_RIGHT or key == glfw.KEY_D:
-                    self.snake.set_key(self.dirs[key])
+                    # self.snake.set_key(self.dirs[key])
+                    self.count = (self.count + 1) % 4
+                    self.snake.set_key(self.clock[self.count])
 
                 elif key == glfw.KEY_UP or key == glfw.KEY_W:
                     self.snake.set_key(self.dirs[key])

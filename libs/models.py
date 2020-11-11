@@ -35,6 +35,8 @@ class Game(object):
         self.count = 0
         # key-lock
         self.lock = False
+        # cam
+        self.cam_angle = 0
 
     def set_speed(self, s):
         self.time = s * 1 / np.log(self.size)
@@ -69,7 +71,8 @@ class Snake(object):
         self.food = food
         self.game = game
         self.pos = game.center
-        self.view_pos = get_pos(game.grid, game.size, self.pos)
+        self.current_pos = get_pos(game.grid, game.size, self.pos)
+        self.view_pos = self.current_pos
         self.dir = 0, 0
         self.key = 0, 0
         self.next = tuple(sum(t) for t in zip(self.pos, self.dir))
@@ -90,7 +93,7 @@ class Snake(object):
         gpu_head_quad = es.toGPUShape(bs.createColorCube(0, 1, 0))
 
         head = sg.SceneGraphNode('head')
-        head.transform = tr.uniformScale(1.7 * game.grid) # 1.8
+        head.transform = tr.uniformScale(1.8 * game.grid) # 1.8
         head.childs += [gpu_head_quad]
 
         head_tr = sg.SceneGraphNode('head_tr')
@@ -117,7 +120,10 @@ class Snake(object):
 
     def draw(self, pipeline, projection, view):
         view_pos = get_pos(self.g_grid, self.g_size, self.pos, self.next,
-                           self.view_pos, i=self.game.count, m=self.game.time / self.game.dt)
+                           self.current_pos, i=self.game.count, m=self.game.time / self.game.dt)
+        theta = get_theta(self.theta, self.new_theta, i=self.game.count - self.t0, m=self.game.time / self.game.dt - self.t0)
+        self.view_pos = view_pos
+        self.game.cam_angle = theta
         self.model.transform = tr.uniformScale(self.g_resize)
         self.head.transform = tr.matmul([
             tr.translate(
@@ -125,7 +131,7 @@ class Snake(object):
                 ty=view_pos[1],
                 tz=1.8*self.game.grid / 2
             ),
-            tr.rotationZ(get_theta(self.theta, self.new_theta, i=self.game.count-self.t0, m=self.game.time / self.game.dt-self.t0))
+            tr.rotationZ(theta)
         ])
         glUseProgram(pipeline.shaderProgram)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
@@ -141,7 +147,7 @@ class Snake(object):
             self.pos = self.next
             self.next = tuple(sum(t) for t in zip(self.pos, self.dir))
             self.theta = self.new_theta
-            self.view_pos = get_pos(self.g_grid, self.g_size, self.pos)
+            self.current_pos = get_pos(self.g_grid, self.g_size, self.pos)
             self.bodySnake.update(self.tail)
         if self.game.notFood:
             self.game.win = True
@@ -171,7 +177,8 @@ class Snake(object):
 
     def dead(self):
         self.pos = self.g_center
-        self.view_pos = get_pos(self.g_grid, self.g_size, self.pos)
+        self.current_pos = get_pos(self.g_grid, self.g_size, self.pos)
+        self.view_pos = self.current_pos
         self.dir = 0, 0
         self.key = 0, 0
         self.next = tuple(sum(t) for t in zip(self.pos, self.dir))
@@ -374,8 +381,8 @@ class interactiveWindow(object):
 
 
 class Axis(object):
-    def __init__(self, len):
-        self.model = es.toGPUShape(bs.createAxis(len))
+    def __init__(self, ln):
+        self.model = es.toGPUShape(bs.createAxis(ln))
 
     def draw(self, pipeline, projection, view):
         glUseProgram(pipeline.shaderProgram)
