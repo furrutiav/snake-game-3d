@@ -2,6 +2,7 @@
 -----------> MODELS <-----------
 """
 
+import glfw
 from libs import basic_shapes as bs, transformations as tr, easy_shaders as es, scene_graph as sg
 import numpy as np
 from OpenGL.GL import *
@@ -14,7 +15,7 @@ class Game(object):
         self.size = n
         self.grid = 1 / n
         self.center = tuple(int(n / 2) for _ in range(2))
-        self.time = 1 / np.log(n) * [1, 10][1]
+        self.time = 1 / np.log(n) * [1, 10, 5][2]
         self.resize = n / (n + 2)
         self.count_food = 0
         self.empty = set()
@@ -39,7 +40,7 @@ class Game(object):
         self.time = s * 1 / np.log(self.size)
 
     def post_time(self, t0):
-        self.dt = [0.005, (self.dt + t0 - self.t + 0.002) / 3][0]
+        self.dt = [0.005, (self.dt + t0 - self.t + 0.005) / 3][0]
         self.t = t0
 
     def check_time(self):
@@ -76,15 +77,20 @@ class Snake(object):
         self.angle = {
             (0, 0): np.pi / 2,
             (-1, 0): np.pi / 2,
-            (1, 0): -np.pi / 2,
+            (1, 0): 3*np.pi / 2,
             (0, -1): 0,
             (0, 1): np.pi
         }
+        # angle
+        self.theta = 0
+        self.new_theta = self.theta
+        # time
+        self.t0 = 0
 
         gpu_head_quad = es.toGPUShape(bs.createColorCube(0, 1, 0))
 
         head = sg.SceneGraphNode('head')
-        head.transform = tr.uniformScale(1 * game.grid) # 1.8
+        head.transform = tr.uniformScale(1.7 * game.grid) # 1.8
         head.childs += [gpu_head_quad]
 
         head_tr = sg.SceneGraphNode('head_tr')
@@ -111,7 +117,7 @@ class Snake(object):
 
     def draw(self, pipeline, projection, view):
         view_pos = get_pos(self.g_grid, self.g_size, self.pos, self.next,
-                           self.view_pos, self.game.count, self.game.time / self.game.dt)
+                           self.view_pos, i=self.game.count, m=self.game.time / self.game.dt)
         self.model.transform = tr.uniformScale(self.g_resize)
         self.head.transform = tr.matmul([
             tr.translate(
@@ -119,7 +125,7 @@ class Snake(object):
                 ty=view_pos[1],
                 tz=1.8*self.game.grid / 2
             ),
-            tr.rotationZ(self.angle[self.dir])
+            tr.rotationZ(get_theta(self.theta, self.new_theta, i=self.game.count-self.t0, m=self.game.time / self.game.dt-self.t0))
         ])
         glUseProgram(pipeline.shaderProgram)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
@@ -134,6 +140,7 @@ class Snake(object):
             self.dir = self.key
             self.pos = self.next
             self.next = tuple(sum(t) for t in zip(self.pos, self.dir))
+            self.theta = self.new_theta
             self.view_pos = get_pos(self.g_grid, self.g_size, self.pos)
             self.bodySnake.update(self.tail)
         if self.game.notFood:
@@ -142,6 +149,9 @@ class Snake(object):
     def set_key(self, k):
         if self.is_new_dir(k):
             self.key = k
+            self.theta = self.new_theta
+            self.new_theta = self.angle[k]
+            self.t0 = self.game.count
             self.game.lock = True
 
     def collide(self):
@@ -389,3 +399,12 @@ def get_pos(grid, size, pos, next=None, current=None, i=0, m=1):
         return tuple(
             next_pos[t] * (i / m) + current[t] * (1 - i / m)
             for t in range(2))
+
+
+def get_theta(theta_1, theta_2, i=0, m=1):
+    if theta_1 == 0 and theta_2 == 3 * np.pi / 2:
+        return (i / m) * (-np.pi / 2) + (1 - i / m) * theta_1
+    elif theta_2 == 0 and theta_1 == 3 * np.pi / 2:
+        return (i / m) * (2*np.pi) + (1 - i / m) * theta_1
+    else:
+        return (i / m)*theta_2 + (1 - i / m)*theta_1

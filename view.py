@@ -2,7 +2,6 @@
 -----------> VIEW <-----------
 """
 
-import glfw
 import sys
 from libs.models import *
 from libs.controller import Controller
@@ -60,7 +59,7 @@ if __name__ == '__main__':
         np.array([0, 0, 0]),
         np.array([0, 1, 0])
     )
-    view = [view0, view1][1]
+    view = [view0, view1][0]
     while not glfw.window_should_close(window):
         ti = glfw.get_time()
         game.post_time(ti)
