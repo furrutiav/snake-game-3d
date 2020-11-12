@@ -359,3 +359,22 @@ def createTextureNormalsCube(image_filename):
 
     return Shape(vertices, indices, image_filename)
 
+
+def createTextureNormalsQuad(image_filename, nx = 1, ny = 1):
+    # Defining locations,texture coordinates and normals for each vertex of the shape
+    vertices = [
+    #   positions        texture        normals
+        -0.5, -0.5, 0,    0, ny,        0,0,1,
+         0.5, -0.5, 0,    nx, ny,        0,0,1,
+         0.5,  0.5, 0,    nx, 0,        0,0,1,
+        -0.5,  0.5, 0,    0, 0,        0,0,1,]
+
+    # Defining connections among vertices
+    # We have a triangle every 3 indices specified
+
+    indices = [
+         0, 1, 2,
+         2, 3, 0]
+
+    return Shape(vertices, indices, image_filename)
+

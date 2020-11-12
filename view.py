@@ -30,17 +30,19 @@ if __name__ == '__main__':
     glfw.set_key_callback(window, controller.on_key)
 
     pipeline_tx = es.SimpleTextureModelViewProjectionShaderProgram()
+    pipeline_ls_tx = ls.SimpleTexturePhongShaderProgram()
     pipeline_col = es.SimpleModelViewProjectionShaderProgram()
+    pipeline_ls_col = ls.SimplePhongShaderProgram()
 
     glClearColor(48/255, 48/255, 48/255, 1.0)
 
     glEnable(GL_DEPTH_TEST)
 
-    bg = Background(game, "bricks.png")
     food = Food(game)
     snake = Snake(game, food)
     iW = interactiveWindow()
     cam = Cam(snake, game)
+    bg = Background(game, cam, "bricks.png")
 
     controller.set_snake(snake)
     controller.set_game(game)
@@ -92,11 +94,11 @@ if __name__ == '__main__':
 
         axis.draw(pipeline_col, projection, view)
 
-        bg.draw(pipeline_tx, projection, view)
+        bg.draw(pipeline_ls_tx, projection, view)
 
-        food.draw(pipeline_col, projection, view, ti)
+        food.draw(pipeline_ls_col, projection, view, ti)
 
-        snake.draw(pipeline_col, projection, view)
+        snake.draw(pipeline_ls_tx, projection, view)
 
         if game.check_time():
             snake.update()
