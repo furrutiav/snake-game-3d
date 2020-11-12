@@ -150,7 +150,7 @@ if __name__ == "__main__":
 
     # Creating shapes on GPU memory
     gpuAxis = es.toGPUShape(bs.createAxis(7))
-    gpuSuzanne = es.toGPUShape(shape = readOBJ('../../libs/fig/Light_Bulb_OBJ.obj', (0.9, 0.6, 0.2)))
+    gpuSuzanne = es.toGPUShape(shape = readOBJ('street_lamp.obj', (0.9, 0.6, 0.2)))
 
     t0 = glfw.get_time()
     camera_theta = -3*np.pi/4
@@ -213,7 +213,7 @@ if __name__ == "__main__":
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE,
-                           tr.matmul([tr.rotationX(3.14/2), tr.uniformScale(0.0005), tr.translate(15700, -1900, -900)]))
+                           tr.matmul([tr.rotationX(3.14/2), tr.uniformScale(0.005), tr.translate(0,-560,0)]))
         pipeline.drawShape(gpuSuzanne)
 
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE,

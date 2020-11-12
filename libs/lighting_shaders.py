@@ -10,10 +10,10 @@ from OpenGL.GL import *
 import OpenGL.GL.shaders
 from libs.easy_shaders import GPUShape
 
+
 class SimpleFlatShaderProgram():
 
     def __init__(self):
-
         vertex_shader = """
             #version 130
 
@@ -88,8 +88,7 @@ class SimpleFlatShaderProgram():
             OpenGL.GL.shaders.compileShader(vertex_shader, OpenGL.GL.GL_VERTEX_SHADER),
             OpenGL.GL.shaders.compileShader(fragment_shader, OpenGL.GL.GL_FRAGMENT_SHADER))
 
-
-    def drawShape(self, shape, mode=GL_TRIANGLES):
+    def drawShape(self, shape, mode = GL_TRIANGLES):
         assert isinstance(shape, GPUShape)
 
         # Binding the proper buffers
@@ -101,7 +100,7 @@ class SimpleFlatShaderProgram():
         position = glGetAttribLocation(self.shaderProgram, "position")
         glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 36, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
-        
+
         color = glGetAttribLocation(self.shaderProgram, "color")
         glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, 36, ctypes.c_void_p(12))
         glEnableVertexAttribArray(color)
@@ -117,7 +116,6 @@ class SimpleFlatShaderProgram():
 class SimpleTextureFlatShaderProgram():
 
     def __init__(self):
-
         vertex_shader = """
             #version 130
 
@@ -199,8 +197,7 @@ class SimpleTextureFlatShaderProgram():
             OpenGL.GL.shaders.compileShader(vertex_shader, OpenGL.GL.GL_VERTEX_SHADER),
             OpenGL.GL.shaders.compileShader(fragment_shader, OpenGL.GL.GL_FRAGMENT_SHADER))
 
-
-    def drawShape(self, shape, mode=GL_TRIANGLES):
+    def drawShape(self, shape, mode = GL_TRIANGLES):
         assert isinstance(shape, GPUShape)
 
         # Binding the proper buffers
@@ -213,7 +210,7 @@ class SimpleTextureFlatShaderProgram():
         position = glGetAttribLocation(self.shaderProgram, "position")
         glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 32, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
-        
+
         color = glGetAttribLocation(self.shaderProgram, "texCoords")
         glVertexAttribPointer(color, 2, GL_FLOAT, GL_FALSE, 32, ctypes.c_void_p(12))
         glEnableVertexAttribArray(color)
@@ -229,7 +226,6 @@ class SimpleTextureFlatShaderProgram():
 class SimpleGouraudShaderProgram():
 
     def __init__(self):
-
         vertex_shader = """
             #version 130
 
@@ -304,8 +300,7 @@ class SimpleGouraudShaderProgram():
             OpenGL.GL.shaders.compileShader(vertex_shader, OpenGL.GL.GL_VERTEX_SHADER),
             OpenGL.GL.shaders.compileShader(fragment_shader, OpenGL.GL.GL_FRAGMENT_SHADER))
 
-
-    def drawShape(self, shape, mode=GL_TRIANGLES):
+    def drawShape(self, shape, mode = GL_TRIANGLES):
         assert isinstance(shape, GPUShape)
 
         # Binding the proper buffers
@@ -317,7 +312,7 @@ class SimpleGouraudShaderProgram():
         position = glGetAttribLocation(self.shaderProgram, "position")
         glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 36, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
-        
+
         color = glGetAttribLocation(self.shaderProgram, "color")
         glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, 36, ctypes.c_void_p(12))
         glEnableVertexAttribArray(color)
@@ -333,7 +328,6 @@ class SimpleGouraudShaderProgram():
 class SimpleTextureGouraudShaderProgram():
 
     def __init__(self):
-
         vertex_shader = """
             #version 130
 
@@ -415,8 +409,7 @@ class SimpleTextureGouraudShaderProgram():
             OpenGL.GL.shaders.compileShader(vertex_shader, OpenGL.GL.GL_VERTEX_SHADER),
             OpenGL.GL.shaders.compileShader(fragment_shader, OpenGL.GL.GL_FRAGMENT_SHADER))
 
-
-    def drawShape(self, shape, mode=GL_TRIANGLES):
+    def drawShape(self, shape, mode = GL_TRIANGLES):
         assert isinstance(shape, GPUShape)
 
         # Binding the proper buffers
@@ -429,7 +422,7 @@ class SimpleTextureGouraudShaderProgram():
         position = glGetAttribLocation(self.shaderProgram, "position")
         glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 32, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
-        
+
         color = glGetAttribLocation(self.shaderProgram, "texCoords")
         glVertexAttribPointer(color, 2, GL_FLOAT, GL_FALSE, 32, ctypes.c_void_p(12))
         glEnableVertexAttribArray(color)
@@ -526,8 +519,7 @@ class SimplePhongShaderProgram:
             OpenGL.GL.shaders.compileShader(vertex_shader, OpenGL.GL.GL_VERTEX_SHADER),
             OpenGL.GL.shaders.compileShader(fragment_shader, OpenGL.GL.GL_FRAGMENT_SHADER))
 
-
-    def drawShape(self, shape, mode=GL_TRIANGLES):
+    def drawShape(self, shape, mode = GL_TRIANGLES):
         assert isinstance(shape, GPUShape)
 
         # Binding the proper buffers
@@ -539,7 +531,7 @@ class SimplePhongShaderProgram:
         position = glGetAttribLocation(self.shaderProgram, "position")
         glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 36, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
-        
+
         color = glGetAttribLocation(self.shaderProgram, "color")
         glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, 36, ctypes.c_void_p(12))
         glEnableVertexAttribArray(color)
@@ -640,8 +632,7 @@ class SimpleTexturePhongShaderProgram:
             OpenGL.GL.shaders.compileShader(vertex_shader, OpenGL.GL.GL_VERTEX_SHADER),
             OpenGL.GL.shaders.compileShader(fragment_shader, OpenGL.GL.GL_FRAGMENT_SHADER))
 
-
-    def drawShape(self, shape, mode=GL_TRIANGLES):
+    def drawShape(self, shape, mode = GL_TRIANGLES):
         assert isinstance(shape, GPUShape)
 
         # Binding the proper buffers
@@ -654,7 +645,7 @@ class SimpleTexturePhongShaderProgram:
         position = glGetAttribLocation(self.shaderProgram, "position")
         glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 32, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
-        
+
         texCoords = glGetAttribLocation(self.shaderProgram, "texCoords")
         glVertexAttribPointer(texCoords, 2, GL_FLOAT, GL_FALSE, 32, ctypes.c_void_p(12))
         glEnableVertexAttribArray(texCoords)
@@ -665,6 +656,15 @@ class SimpleTexturePhongShaderProgram:
 
         # Render the active element buffer with the active shader program
         glDrawElements(mode, shape.size, GL_UNSIGNED_INT, None)
+
+
+"""
+F. Urrutia V.
+update Lighting Shaders
+
+v2.2: More light with PhongShader; color and texture
+"""
+
 
 class SimpleTexturePhongShaderProgram2:
 
@@ -696,7 +696,7 @@ class SimpleTexturePhongShaderProgram2:
 
         fragment_shader = """
             #version 330 core
-
+            
             in vec3 fragNormal;
             in vec3 fragPosition;
             in vec2 fragTexCoords;
@@ -952,3 +952,314 @@ class SimplePhongShaderProgram2:
 
         # Render the active element buffer with the active shader program
         glDrawElements(mode, shape.size, GL_UNSIGNED_INT, None)
+
+
+class SimpleTexturePhongShaderProgramMulti:
+
+    def __init__(self, num):
+        vertex_shader = """
+            #version 330 core
+
+            in vec3 position;
+            in vec2 texCoords;
+            in vec3 normal;
+
+            out vec3 fragPosition;
+            out vec2 fragTexCoords;
+            out vec3 fragNormal;
+
+            uniform mat4 model;
+            uniform mat4 view;
+            uniform mat4 projection;
+
+            void main()
+            {
+                fragPosition = vec3(model * vec4(position, 1.0));
+                fragTexCoords = texCoords;
+                fragNormal = mat3(transpose(inverse(model))) * normal;  
+
+                gl_Position = projection * view * vec4(fragPosition, 1.0);
+            }
+            """
+
+        fragment_shader = tx_multi_fragment_shader_code(num)
+
+        self.shaderProgram = OpenGL.GL.shaders.compileProgram(
+            OpenGL.GL.shaders.compileShader(vertex_shader, OpenGL.GL.GL_VERTEX_SHADER),
+            OpenGL.GL.shaders.compileShader(fragment_shader, OpenGL.GL.GL_FRAGMENT_SHADER))
+
+    def drawShape(self, shape, mode = GL_TRIANGLES):
+        assert isinstance(shape, GPUShape)
+
+        # Binding the proper buffers
+        glBindVertexArray(shape.vao)
+        glBindBuffer(GL_ARRAY_BUFFER, shape.vbo)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shape.ebo)
+        glBindTexture(GL_TEXTURE_2D, shape.texture)
+
+        # 3d vertices + 2d texture coordinates + 3d normals => 3*4 + 2*4 + 3*4 = 32 bytes
+        position = glGetAttribLocation(self.shaderProgram, "position")
+        glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 32, ctypes.c_void_p(0))
+        glEnableVertexAttribArray(position)
+
+        texCoords = glGetAttribLocation(self.shaderProgram, "texCoords")
+        glVertexAttribPointer(texCoords, 2, GL_FLOAT, GL_FALSE, 32, ctypes.c_void_p(12))
+        glEnableVertexAttribArray(texCoords)
+
+        normal = glGetAttribLocation(self.shaderProgram, "normal")
+        glVertexAttribPointer(normal, 3, GL_FLOAT, GL_FALSE, 32, ctypes.c_void_p(20))
+        glEnableVertexAttribArray(normal)
+
+        # Render the active element buffer with the active shader program
+        glDrawElements(mode, shape.size, GL_UNSIGNED_INT, None)
+
+
+class SimplePhongShaderProgramMulti:
+
+    def __init__(self, num):
+        vertex_shader = """
+            #version 330 core
+
+            layout (location = 0) in vec3 position;
+            layout (location = 1) in vec3 color;
+            layout (location = 2) in vec3 normal;
+
+            out vec3 fragPosition;
+            out vec3 fragOriginalColor;
+            out vec3 fragNormal;
+
+            uniform mat4 model;
+            uniform mat4 view;
+            uniform mat4 projection;
+
+            void main()
+            {
+                fragPosition = vec3(model * vec4(position, 1.0));
+                fragOriginalColor = color;
+                fragNormal = mat3(transpose(inverse(model))) * normal;  
+
+                gl_Position = projection * view * vec4(fragPosition, 1.0);
+            }
+            """
+
+        fragment_shader = _multi_fragment_shader_code(num)
+
+        self.shaderProgram = OpenGL.GL.shaders.compileProgram(
+            OpenGL.GL.shaders.compileShader(vertex_shader, OpenGL.GL.GL_VERTEX_SHADER),
+            OpenGL.GL.shaders.compileShader(fragment_shader, OpenGL.GL.GL_FRAGMENT_SHADER))
+
+    def drawShape(self, shape, mode = GL_TRIANGLES):
+        assert isinstance(shape, GPUShape)
+
+        # Binding the proper buffers
+        glBindVertexArray(shape.vao)
+        glBindBuffer(GL_ARRAY_BUFFER, shape.vbo)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shape.ebo)
+
+        # 3d vertices + rgb color + 3d normals => 3*4 + 3*4 + 3*4 = 36 bytes
+        position = glGetAttribLocation(self.shaderProgram, "position")
+        glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 36, ctypes.c_void_p(0))
+        glEnableVertexAttribArray(position)
+
+        color = glGetAttribLocation(self.shaderProgram, "color")
+        glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, 36, ctypes.c_void_p(12))
+        glEnableVertexAttribArray(color)
+
+        normal = glGetAttribLocation(self.shaderProgram, "normal")
+        glVertexAttribPointer(normal, 3, GL_FLOAT, GL_FALSE, 36, ctypes.c_void_p(24))
+        glEnableVertexAttribArray(normal)
+
+        # Render the active element buffer with the active shader program
+        glDrawElements(mode, shape.size, GL_UNSIGNED_INT, None)
+
+
+def _multi_fragment_shader_code(size):
+    code = """
+        #version 330 core
+        
+        out vec4 fragColor;
+        
+        in vec3 fragNormal;
+        in vec3 fragPosition;
+        in vec3 fragOriginalColor;
+        
+        uniform vec3 viewPosition;
+    """
+    for i in range(1, size + 1):
+        code += f"""
+        uniform vec3 lightPosition{i};
+        uniform vec3 La{i};
+        uniform vec3 Ld{i};
+        uniform vec3 Ls{i};
+        uniform vec3 Ka{i};
+        uniform vec3 Kd{i};
+        uniform vec3 Ks{i};
+        uniform uint shininess{i};
+        uniform float constantAttenuation{i};
+        uniform float linearAttenuation{i};
+        uniform float quadraticAttenuation{i};
+        """
+    code += """
+        void main()
+        {
+            // ambient
+        """
+    line = ""
+    for i in range(1, size + 1):
+        code += f"""
+            vec3 ambient{i} = Ka{i} * La{i};
+        """
+        line += f"ambient{i}+ "
+    line = line[:-2]
+    code += """
+            vec3 ambient = (""" + line + """);
+            // diffuse
+            // fragment normal has been interpolated, so it does not necessarily have norm equal to 1
+            vec3 normalizedNormal = normalize(fragNormal);
+        """
+    line = ""
+    for i in range(1, size + 1):
+        code += f"""
+            vec3 toLight{i} = lightPosition{i} - fragPosition;
+            vec3 lightDir{i} = normalize(toLight{i});
+            float diff{i} = max(dot(normalizedNormal, lightDir{i}), 0.0);
+            vec3 diffuse{i} = Kd{i} * Ld{i} * diff{i};
+        """
+        line += f"diffuse{i}+ "
+    line = line[:-2]
+    code += """
+            vec3 diffuse = (""" + line + """);
+
+            // specular
+            vec3 viewDir = normalize(viewPosition - fragPosition);
+        """
+    line = ""
+    for i in range(1, size + 1):
+        code += f"""
+            vec3 reflectDir{i} = reflect(-lightDir{i}, normalizedNormal);  
+            float spec{i} = pow(max(dot(viewDir, reflectDir{i}), 0.0), shininess{i});
+            vec3 specular{i} = Ks{i} * Ls{i} * spec{i};
+        """
+        line += f"specular{i}+ "
+    line = line[:-2]
+    code += """
+            vec3 specular = (""" + line + """);
+
+            // attenuation
+        """
+    line = ""
+    for i in range(1, size + 1):
+        code += f"""
+            float distToLight{i} = length(toLight{i});
+            float attenuation{i} = constantAttenuation{i}
+                + linearAttenuation{i} * distToLight{i}
+                + quadraticAttenuation{i} * distToLight{i} * distToLight{i};
+            """
+        line += f"attenuation{i}+ "
+    line = line[:-2]
+    code += """
+            float attenuation = (""" + line + """);
+
+            vec3 result = (ambient + ((diffuse + specular) / attenuation)) * fragOriginalColor;
+            fragColor = vec4(result, 1.0);
+        }
+        """
+    return code
+
+
+def tx_multi_fragment_shader_code(size):
+    code = """
+        #version 330 core
+
+        in vec3 fragNormal;
+        in vec3 fragPosition;
+        in vec2 fragTexCoords;
+        
+        out vec4 fragColor;
+
+        uniform vec3 viewPosition;
+    """
+    for i in range(1, size + 1):
+        code += f"""
+        uniform vec3 lightPosition{i};
+        uniform vec3 La{i};
+        uniform vec3 Ld{i};
+        uniform vec3 Ls{i};
+        uniform vec3 Ka{i};
+        uniform vec3 Kd{i};
+        uniform vec3 Ks{i};
+        uniform uint shininess{i};
+        uniform float constantAttenuation{i};
+        uniform float linearAttenuation{i};
+        uniform float quadraticAttenuation{i};
+        """
+    code += """
+        uniform sampler2D samplerTex;
+    
+        void main()
+        {
+            // ambient
+        """
+    line = ""
+    for i in range(1, size + 1):
+        code += f"""
+            vec3 ambient{i} = Ka{i} * La{i};
+        """
+        line += f"ambient{i}+ "
+    line = line[:-2]
+    code += """
+            vec3 ambient = (""" + line + """);
+            // diffuse
+            // fragment normal has been interpolated, so it does not necessarily have norm equal to 1
+            vec3 normalizedNormal = normalize(fragNormal);
+        """
+    line = ""
+    for i in range(1, size + 1):
+        code += f"""
+            vec3 toLight{i} = lightPosition{i} - fragPosition;
+            vec3 lightDir{i} = normalize(toLight{i});
+            float diff{i} = max(dot(normalizedNormal, lightDir{i}), 0.0);
+            vec3 diffuse{i} = Kd{i} * Ld{i} * diff{i};
+        """
+        line += f"diffuse{i}+ "
+    line = line[:-2]
+    code += """
+            vec3 diffuse = (""" + line + """);
+
+            // specular
+            vec3 viewDir = normalize(viewPosition - fragPosition);
+        """
+    line = ""
+    for i in range(1, size + 1):
+        code += f"""
+            vec3 reflectDir{i} = reflect(-lightDir{i}, normalizedNormal);  
+            float spec{i} = pow(max(dot(viewDir, reflectDir{i}), 0.0), shininess{i});
+            vec3 specular{i} = Ks{i} * Ls{i} * spec{i};
+        """
+        line += f"specular{i}+ "
+    line = line[:-2]
+    code += """
+            vec3 specular = (""" + line + """);
+
+            // attenuation
+        """
+    line = ""
+    for i in range(1, size + 1):
+        code += f"""
+            float distToLight{i} = length(toLight{i});
+            float attenuation{i} = constantAttenuation{i}
+                + linearAttenuation{i} * distToLight{i}
+                + quadraticAttenuation{i} * distToLight{i} * distToLight{i};
+            """
+        line += f"attenuation{i}+ "
+    line = line[:-2]
+    code += """
+            float attenuation = (""" + line + """);
+            
+            vec4 fragOriginalColor = texture(samplerTex, fragTexCoords);
+
+            vec3 result = (ambient + ((diffuse + specular) / attenuation)) * fragOriginalColor.rgb;
+            fragColor = vec4(result, 1.0);
+        }
+        """
+    return code

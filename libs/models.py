@@ -15,7 +15,7 @@ class Game(object):
         self.size = n
         self.grid = 1 / n
         self.center = tuple(int(n / 2) for _ in range(2))
-        self.time = 1 / np.log(n) * [2, 10, 5][0]
+        self.time = 1 / np.log(n) * [2, 10, 5, 1][0]
         self.count_food = 0
         self.empty = set()
         for i in range(0, self.size):
@@ -46,7 +46,7 @@ class Game(object):
         self.time = s * 1 / np.log(self.size)
 
     def post_time(self, t0):
-        self.dt = [0.005, (self.dt + t0 - self.t + 0.005) / 3][0]
+        self.dt = [0.005, (self.dt + t0 - self.t + 0.005) / 3, (self.dt + t0 - self.t) / 2][0]
         self.t = t0
 
     def check_time(self):

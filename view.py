@@ -32,10 +32,11 @@ if __name__ == '__main__':
 
     pipeline_tx = es.SimpleTextureModelViewProjectionShaderProgram()
     pipeline_ls_tx = ls.SimpleTexturePhongShaderProgram()
-    pipeline_ls_tx2 = ls.SimpleTexturePhongShaderProgram2()
+    pipeline_ls_tx2 = ls.SimpleTexturePhongShaderProgramMulti(2)
     pipeline_col = es.SimpleModelViewProjectionShaderProgram()
     pipeline_ls_col = ls.SimplePhongShaderProgram()
-    pipeline_ls_col2 = ls.SimplePhongShaderProgram2()
+    pipeline_ls_col2 = ls.SimplePhongShaderProgramMulti(2)
+    pipeline_ls_col3 = ls.SimplePhongShaderProgramMulti(3)
 
     glClearColor(48/255, 48/255, 48/255, 1.0)
 
