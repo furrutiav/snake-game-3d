@@ -12,8 +12,8 @@ if __name__ == '__main__':
     if not glfw.init():
         sys.exit()
 
-    width = int(1920 * 0.7)
-    height = int(1080 * 0.7)
+    width = int(1920 * 0.8)
+    height = int(1080 * 0.8)
     window = glfw.create_window(
         width, height, 'Snake Game 3D; Autor: Felipe Urrutia V.', None, None)
 

@@ -47,7 +47,6 @@ def readFaceVertex(faceDescription):
     assert len(aux[0]), "Vertex index has not been defined."
 
     faceVertex = [int(aux[0]), None, None]
-
     assert len(aux) == 3, "Only faces where its vertices require 3 indices are defined."
 
     if len(aux[1]) != 0:
@@ -68,18 +67,19 @@ def readOBJ(filename, color):
     faces = []
 
     with open(filename, 'r') as file:
+        count = 0
         for line in file.readlines():
+            count +=1
             aux = line.strip().split(' ')
-            
             if aux[0] == 'v':
-                vertices += [[float(coord) for coord in aux[1:]]]
+                vertices += [[float(coord) for coord in aux[2:]]]
 
             elif aux[0] == 'vn':
                 normals += [[float(coord) for coord in aux[1:]]]
 
             elif aux[0] == 'vt':
-                assert len(aux[1:]) == 2, "Texture coordinates with different than 2 dimensions are not supported"
-                textCoords += [[float(coord) for coord in aux[1:]]]
+                # assert len(aux[1:]) == 2, "Texture coordinates with different than 2 dimensions are not supported"
+                textCoords += [[float(coord) for coord in aux[1:2]]]
 
             elif aux[0] == 'f':
                 N = len(aux)                
@@ -150,8 +150,7 @@ if __name__ == "__main__":
 
     # Creating shapes on GPU memory
     gpuAxis = es.toGPUShape(bs.createAxis(7))
-    gpuSuzanne = es.toGPUShape(shape = readOBJ('suzanne.obj', (0.9,0.6,0.2)))
-    gpuCarrot = es.toGPUShape(shape = readOBJ('carrot.obj', (0.6,0.9,0.5)))
+    gpuSuzanne = es.toGPUShape(shape = readOBJ('../../libs/fig/Light_Bulb_OBJ.obj', (0.9, 0.6, 0.2)))
 
     t0 = glfw.get_time()
     camera_theta = -3*np.pi/4
@@ -213,7 +212,8 @@ if __name__ == "__main__":
 
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
-        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE, tr.uniformScale(3))
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE,
+                           tr.matmul([tr.rotationX(3.14/2), tr.uniformScale(0.0005), tr.translate(15700, -1900, -900)]))
         pipeline.drawShape(gpuSuzanne)
 
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE,
@@ -222,7 +222,6 @@ if __name__ == "__main__":
                 tr.rotationX(np.pi/2),
                 tr.translate(1.5,-0.25,0)])
         )
-        pipeline.drawShape(gpuCarrot)
         
         glUseProgram(mvpPipeline.shaderProgram)
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)

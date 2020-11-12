@@ -300,12 +300,16 @@ class Food(object):
         self.pos = tuple(rd.randint(0, game.size - 1) for _ in range(2))
         self.view_pos = get_pos(game.grid, game.size, self.pos)
 
-        gpu_food_quad = es.toGPUShape(bs.createColorNormalsCube(1, 0, 0))
+        gpu_food_quad = es.toGPUShape(bs.readOBJ('libs/fig/Light_Bulb_OBJ.obj', (1, 0, 0)))
+        # bs.createColorNormalsCube(1, 0, 0)
 
         food = sg.SceneGraphNode('food')
-        food.transform = tr.uniformScale(1 * game.grid)
+        food.transform = tr.matmul([
+            tr.uniformScale(0.8*game.grid),
+            tr.rotationX(np.pi/2),
+            tr.uniformScale(0.00015),
+            tr.translate(15700, -5900, -900)])
         food.childs += [gpu_food_quad]
-
         food_tr = sg.SceneGraphNode('food_tr')
         food_tr.transform = tr.translate(
             tx=self.view_pos[0],
@@ -385,7 +389,7 @@ class Background(object):
 
         gpu_BG_quad = es.toGPUShape(
             bs.createTextureNormalsQuad(image, game.size, game.size), GL_REPEAT,
-            GL_LINEAR)  # bs.createTextureQuad(image, game.size, game.size)
+            GL_LINEAR)
 
         BG = sg.SceneGraphNode('BG')
         BG.transform = tr.uniformScale(2)  # tr.scale(2, 2, 0.001)  #
@@ -400,7 +404,7 @@ class Background(object):
         glUseProgram(pipeline.shaderProgram)
 
         # White light in all components: ambient, diffuse and specular.
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La1"), 0.0, 0.0, 0.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La1"), 0.5, 0.2, 0.0)
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld1"), 1.0, 1.0, 1.0)
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls1"), 1.0, 1.0, 1.0)
 
@@ -414,8 +418,8 @@ class Background(object):
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks1"), 1.0, 1.0, 1.0)
 
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka2"), 0, 0, 0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd2"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks2"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd2"), 0.7, 1.0, 0.7)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks2"), 0.0, 0.0, 0.0)
 
         # TO DO: Explore different parameter combinations to understand their effect!
 
@@ -521,23 +525,9 @@ class Cam(object):
         self.status = 'R'
         ratio = 16 / 9
         self.projection = [
-            tr.ortho(-1 * ratio, 1 * ratio, -1, 1, 0.01, 1000),
+            tr.ortho(-1.1 * ratio, 1.1 * ratio, -1.1, 1.1, 0.1, 100),
             tr.perspective(2 * np.pi, ratio, 0.1, 1000),
             tr.perspective(1.5 * np.pi, ratio, 0.1, 1000)
-        ]
-        self.view = [
-            tr.lookAt(
-                np.array([10, -10, 10]),
-                np.array([0, 0, 0]),
-                np.array([0, 0, 1])),
-            tr.lookAt(
-                np.array([0, 0, 10]),
-                np.array([0, 0, 0]),
-                np.array([0, 1, 0])),
-            tr.lookAt(
-                np.array([0, -10, 10]),
-                np.array([0, 0, 0]),
-                np.array([0, 0, 1]))
         ]
 
     def get_cam_gta(self):
