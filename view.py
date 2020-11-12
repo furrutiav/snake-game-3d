@@ -28,11 +28,14 @@ if __name__ == '__main__':
     game = Game(N)
 
     glfw.set_key_callback(window, controller.on_key)
+    glfw.set_scroll_callback(window, controller.on_scroll)
 
     pipeline_tx = es.SimpleTextureModelViewProjectionShaderProgram()
     pipeline_ls_tx = ls.SimpleTexturePhongShaderProgram()
+    pipeline_ls_tx2 = ls.SimpleTexturePhongShaderProgram2()
     pipeline_col = es.SimpleModelViewProjectionShaderProgram()
     pipeline_ls_col = ls.SimplePhongShaderProgram()
+    pipeline_ls_col2 = ls.SimplePhongShaderProgram2()
 
     glClearColor(48/255, 48/255, 48/255, 1.0)
 
@@ -41,7 +44,7 @@ if __name__ == '__main__':
     food = Food(game)
     snake = Snake(game, food)
     iW = interactiveWindow()
-    cam = Cam(snake, game)
+    cam = Cam(game)
     bg = Background(game, cam, "bricks.png")
 
     controller.set_snake(snake)
@@ -88,17 +91,17 @@ if __name__ == '__main__':
         #             game.time_pause += 0.01
         #         else:
         #             game.time_pause = 2*np.pi
-        # else:
+        # else:d
 
         projection, view = cam.get_cam()
 
         axis.draw(pipeline_col, projection, view)
 
-        bg.draw(pipeline_ls_tx, projection, view)
+        bg.draw(pipeline_ls_tx2, projection, view)
 
-        food.draw(pipeline_ls_col, projection, view, ti)
+        food.draw(pipeline_ls_col2, projection, view, ti)
 
-        snake.draw(pipeline_ls_tx, projection, view)
+        snake.draw(pipeline_ls_tx2, projection, view)
 
         if game.check_time():
             snake.update()

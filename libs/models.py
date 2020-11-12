@@ -16,7 +16,6 @@ class Game(object):
         self.grid = 1 / n
         self.center = tuple(int(n / 2) for _ in range(2))
         self.time = 1 / np.log(n) * [2, 10, 5][0]
-        self.resize = n / (n + 2)
         self.count_food = 0
         self.empty = set()
         for i in range(0, self.size):
@@ -38,6 +37,10 @@ class Game(object):
         # cam
         self.cam_angle = 0
         self.view_cam = None
+        # set
+        self.numb = 0
+        #
+        self.view_pos = None
 
     def set_speed(self, s):
         self.time = s * 1 / np.log(self.size)
@@ -73,7 +76,7 @@ class Snake(object):
         self.game = game
         self.pos = game.center
         self.current_pos = get_pos(game.grid, game.size, self.pos)
-        self.view_pos = self.current_pos
+        game.view_pos = self.current_pos
         self.dir = 0, 0
         self.key = 0, 0
         self.next = tuple(sum(t) for t in zip(self.pos, self.dir))
@@ -92,7 +95,7 @@ class Snake(object):
         self.t0 = 0
 
         gpu_head_quad = es.toGPUShape(bs.createTextureNormalsCube('libs/fig/head.png'), GL_REPEAT,
-            GL_LINEAR)
+                                      GL_LINEAR)
 
         head = sg.SceneGraphNode('head')
         head.transform = tr.uniformScale(1.8 * game.grid)  # 1.8
@@ -115,7 +118,6 @@ class Snake(object):
         self.head = head_tr
         self.bodySnake = bodySnake(self)
 
-        self.g_resize = self.game.resize
         self.g_grid = self.game.grid
         self.g_size = self.game.size
         self.g_center = self.game.center
@@ -125,9 +127,8 @@ class Snake(object):
                            self.current_pos, i=self.game.count, m=self.game.time / self.game.dt)
         theta = get_theta(self.theta, self.new_theta, i=self.game.count - self.t0,
                           m=self.game.time / self.game.dt - self.t0)
-        self.view_pos = view_pos
+        self.game.view_pos = view_pos
         self.game.cam_angle = theta
-        self.model.transform = tr.uniformScale(self.g_resize)
         self.head.transform = tr.matmul([
             tr.translate(
                 tx=view_pos[0],
@@ -139,26 +140,42 @@ class Snake(object):
         glUseProgram(pipeline.shaderProgram)
 
         # White light in all components: ambient, diffuse and specular.
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La1"), 0.0, 0.0, 0.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld1"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls1"), 1.0, 1.0, 1.0)
+
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La2"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld2"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls2"), 1.0, 1.0, 1.0)
 
         # Object is barely visible at only ambient. Bright white for diffuse and specular components.
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka"), 0.2, 0.2, 0.2)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd"), 0.9, 0.9, 0.9)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka1"), 0.2, 0.2, 0.2)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd1"), 0.9, 0.9, 0.9)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks1"), 1.0, 1.0, 1.0)
+
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka2"), 0, 0, 0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd2"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks2"), 1.0, 1.0, 1.0)
 
         # TO DO: Explore different parameter combinations to understand their effect!
 
-        viewPos = self.game.view_cam
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition"), -5, -5, 5)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "viewPosition"), viewPos[0], viewPos[1],
-                    viewPos[2])
-        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess"), 100)
+        camPos = self.game.view_cam
+        snakePos = view_pos
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition1"), 0, -5, 8)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition2"), snakePos[0], snakePos[1], 0.1)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "viewPosition"), camPos[0], camPos[1],
+                    camPos[2])
 
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation"), 0.0001)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation"), 0.03)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation"), 0.01)
+        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess1"), 100)
+        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess2"), -1)
+
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation1"), 0.0001)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation1"), 0.03)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation1"), 0.01)
+
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation2"), -0.59)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation2"), 8.79)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation2"), 0)
 
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
@@ -204,7 +221,7 @@ class Snake(object):
     def dead(self):
         self.pos = self.g_center
         self.current_pos = get_pos(self.g_grid, self.g_size, self.pos)
-        self.view_pos = self.current_pos
+        self.game.view_pos = self.current_pos
         self.dir = 0, 0
         self.key = 0, 0
         self.next = tuple(sum(t) for t in zip(self.pos, self.dir))
@@ -228,7 +245,7 @@ class bodyCreator(object):
         view_pos = get_pos(game.grid, game.size, pos)
 
         gpu_body_quad = es.toGPUShape(bs.createTextureNormalsCube('libs/fig/body.png'), GL_REPEAT,
-            GL_LINEAR)
+                                      GL_LINEAR)
 
         body_sh = sg.SceneGraphNode('body_sh')
         body_sh.transform = tr.uniformScale(1.7 * game.grid)
@@ -260,7 +277,6 @@ class bodySnake(object):
     snake: Union['Snake', None]
 
     def __init__(self, snake):
-        self.snake = snake
         self.game = snake.game
         self.body = snake.body
         self.list = []
@@ -277,7 +293,7 @@ class bodySnake(object):
 
 
 class Food(object):
-    snake: Union['Snake', None]
+    game: Union['Game', None]
 
     def __init__(self, game):
         self.game = game
@@ -298,13 +314,11 @@ class Food(object):
         food_tr.childs += [food]
 
         self.model = food_tr
-        self.g_resize = self.game.resize
         self.g_grid = self.game.grid
         self.g_size = self.game.size
 
     def draw(self, pipeline, projection, view, theta):
         self.model.transform = tr.matmul([
-            tr.uniformScale(self.g_resize),
             tr.translate(
                 tx=self.view_pos[0],
                 ty=self.view_pos[1],
@@ -314,26 +328,42 @@ class Food(object):
         glUseProgram(pipeline.shaderProgram)
 
         # White light in all components: ambient, diffuse and specular.
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La1"), 0.0, 0.0, 0.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld1"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls1"), 1.0, 1.0, 1.0)
+
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La2"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld2"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls2"), 1.0, 1.0, 1.0)
 
         # Object is barely visible at only ambient. Bright white for diffuse and specular components.
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka"), 0.2, 0.2, 0.2)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd"), 0.9, 0.9, 0.9)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka1"), 0.2, 0.2, 0.2)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd1"), 0.9, 0.9, 0.9)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks1"), 1.0, 1.0, 1.0)
+
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka2"), 0, 0, 0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd2"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks2"), 1.0, 1.0, 1.0)
 
         # TO DO: Explore different parameter combinations to understand their effect!
 
         viewPos = self.game.view_cam
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition"), -5, -5, 5)
+        snakePos = self.game.view_pos
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition1"), 0, -5, 8)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition2"), snakePos[0], snakePos[1], 0.09)
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "viewPosition"), viewPos[0], viewPos[1],
                     viewPos[2])
-        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess"), 100)
 
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation"), 0.0001)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation"), 0.03)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation"), 0.01)
+        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess1"), 100)
+        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess2"), -1)
+
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation1"), 0.0001)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation1"), 0.03)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation1"), 0.01)
+
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation2"), -0.59)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation2"), 8.79)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation2"), 0)
 
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
@@ -358,48 +388,58 @@ class Background(object):
             GL_LINEAR)  # bs.createTextureQuad(image, game.size, game.size)
 
         BG = sg.SceneGraphNode('BG')
-        BG.transform = tr.uniformScale(2)   # tr.scale(2, 2, 0.001)  #
+        BG.transform = tr.uniformScale(2)  # tr.scale(2, 2, 0.001)  #
         BG.childs += [gpu_BG_quad]
 
         BG_tr = sg.SceneGraphNode('BG_tr')
         BG_tr.childs += [BG]
 
         self.model = BG_tr
-        self.g_resize = self.game.resize
 
     def draw(self, pipeline, projection, view):
-        self.model.transform = tr.uniformScale(self.g_resize)
         glUseProgram(pipeline.shaderProgram)
-        # glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
-        # glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
-        # sg.drawSceneGraphNode(self.model, pipeline)
 
         # White light in all components: ambient, diffuse and specular.
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La1"), 0.0, 0.0, 0.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld1"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls1"), 1.0, 1.0, 1.0)
+
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La2"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld2"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls2"), 1.0, 1.0, 1.0)
 
         # Object is barely visible at only ambient. Bright white for diffuse and specular components.
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka"), 0.2, 0.2, 0.2)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd"), 0.9, 0.9, 0.9)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka1"), 0.2, 0.2, 0.2)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd1"), 0.9, 0.9, 0.9)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks1"), 1.0, 1.0, 1.0)
+
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka2"), 0, 0, 0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd2"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks2"), 1.0, 1.0, 1.0)
 
         # TO DO: Explore different parameter combinations to understand their effect!
 
         viewPos = self.game.view_cam
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition"), -5, -5, 5)
+        snakePos = self.game.view_pos
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition1"), 0, -5, 8)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition2"), snakePos[0], snakePos[1], 0.09)
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "viewPosition"), viewPos[0], viewPos[1],
                     viewPos[2])
-        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess"), 100)
 
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation"), 0.0001)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation"), 0.03)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation"), 0.01)
+        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess1"), 100)
+        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess2"), -1)
+
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation1"), 0.0001)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation1"), 0.03)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation1"), 0.01)
+
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation2"), -0.59)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation2"), 8.79)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation2"), 0)
 
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
         # Drawing
-        # pipeline.drawShape(gpuDice)
         sg.drawSceneGraphNode(self.model, pipeline)
 
 
@@ -475,15 +515,13 @@ class Axis(object):
 
 class Cam(object):
     game: Union['Game', None]
-    snake: Union['Snake', None]
 
-    def __init__(self, s, g):
-        self.snake = s
+    def __init__(self, g):
         self.game = g
         self.status = 'R'
         ratio = 16 / 9
         self.projection = [
-            tr.ortho(-1 * ratio, 1 * ratio, -1, 1, 0.1, 1000),
+            tr.ortho(-1 * ratio, 1 * ratio, -1, 1, 0.01, 1000),
             tr.perspective(2 * np.pi, ratio, 0.1, 1000),
             tr.perspective(1.5 * np.pi, ratio, 0.1, 1000)
         ]
@@ -503,11 +541,12 @@ class Cam(object):
         ]
 
     def get_cam_gta(self):
-        self.game.view_cam = np.array([10 * np.sin(self.game.cam_angle) + self.snake.view_pos[0],
-                                       -10 * np.cos(self.game.cam_angle) + self.snake.view_pos[1], 5])
+        view_cam = np.array([10 * np.sin(self.game.cam_angle) + self.game.view_pos[0],
+                             -10 * np.cos(self.game.cam_angle) + self.game.view_pos[1], 5])
+        self.game.view_cam = view_cam
         view_gta = tr.lookAt(
-            self.game.view_cam,
-            np.array([self.snake.view_pos[i] for i in range(2)] + [1.8 * self.game.grid / 2]),
+            view_cam,
+            np.array([self.game.view_pos[i] for i in range(2)] + [1.8 * self.game.grid / 2]),
             np.array([0, 0, 1]))
         return self.projection[2], view_gta
 

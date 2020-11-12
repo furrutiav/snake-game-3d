@@ -40,7 +40,7 @@ class Controller(object):
         self.cam = c
 
     def on_key(self, window, key, scancode, action, mods):
-        if not (action == glfw.PRESS) or (action == glfw.RELEASE):
+        if not ( action == glfw.PRESS): #S or(action == glfw.RELEASE)
             return
 
         if self.game.pause:
@@ -114,3 +114,14 @@ class Controller(object):
 
             elif key == glfw.KEY_ESCAPE:
                 self.game.pause = True
+
+            elif key == glfw.KEY_1:
+                self.game.numb -= 1
+                print(self.game.numb)
+            elif key == glfw.KEY_2:
+                self.game.numb += 1
+                print(self.game.numb)
+
+    def on_scroll(self, window, pos, action):
+        self.game.numb += action*0.1
+        print(self.game.numb)
