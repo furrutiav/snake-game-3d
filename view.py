@@ -108,7 +108,7 @@ if __name__ == '__main__':
 
         food.draw(pipeline_ls_col3, projection, view, ti)
 
-        snake.draw(pipeline_ls_tx7, projection, view)
+        snake.draw(pipeline_ls_col7, projection, view)
 
         if game.check_time():
             snake.update()

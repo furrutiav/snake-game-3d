@@ -396,8 +396,7 @@ def readFaceVertex(faceDescription):
     return faceVertex
 
 
-
-def readOBJ(filename, color):
+def readOBJ(filename, color, status = True):
 
     vertices = []
     normals = []
@@ -410,14 +409,19 @@ def readOBJ(filename, color):
             count +=1
             aux = line.strip().split(' ')
             if aux[0] == 'v':
-                vertices += [[float(coord) for coord in aux[2:]]]
-
+                if status:
+                    vertices += [[float(coord) for coord in aux[2:]]]
+                else:
+                    vertices += [[float(coord) for coord in aux[1:]]]
             elif aux[0] == 'vn':
                 normals += [[float(coord) for coord in aux[1:]]]
 
             elif aux[0] == 'vt':
                 # assert len(aux[1:]) == 2, "Texture coordinates with different than 2 dimensions are not supported"
-                textCoords += [[float(coord) for coord in aux[1:3]]]
+                if status:
+                    textCoords += [[float(coord) for coord in aux[1:3]]]
+                else:
+                    textCoords += [[float(coord) for coord in aux[1:]]]
 
             elif aux[0] == 'f':
                 N = len(aux)
@@ -433,7 +437,7 @@ def readOBJ(filename, color):
         for face in faces:
 
             # Checking each of the triangle vertices
-            for i in range(0,3):
+            for i in range(0, 3):
                 vertex = vertices[face[i][0]-1]
                 normal = normals[face[i][2]-1]
 

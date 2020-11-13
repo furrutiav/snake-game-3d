@@ -97,16 +97,37 @@ class Snake(object):
         # time
         self.t0 = 0
 
-        gpu_head_quad = es.toGPUShape(bs.createTextureNormalsCube('libs/fig/head.png'), GL_REPEAT,
-                                      GL_LINEAR)
+        gpu_head_quad = es.toGPUShape(bs.readOBJ('libs/fig/head.obj', (0, 1, 0), status=False))
+        gpu_eyes_quad = es.toGPUShape(bs.readOBJ('libs/fig/eyes.obj', (1, 0, 0), status=False))
+        gpu_teeth_quad = es.toGPUShape(bs.readOBJ('libs/fig/teeth.obj', (1, 1, 1), status=False))
 
         head = sg.SceneGraphNode('head')
-        head.transform = tr.uniformScale(1.8 * game.grid)  # 1.8
+        head.transform = tr.matmul([
+            tr.rotationZ(np.pi / 2),
+            tr.rotationX(np.pi/2),
+            tr.uniformScale(0.01),
+            tr.translate(0, 0, 0)])
         head.childs += [gpu_head_quad]
+
+        eyes = sg.SceneGraphNode('eyes')
+        eyes.transform = tr.matmul([
+            tr.rotationZ(np.pi / 2),
+            tr.rotationX(np.pi/2),
+            tr.uniformScale(0.01),
+            tr.translate(0, 0, 0)])
+        eyes.childs += [gpu_eyes_quad]
+
+        teeth = sg.SceneGraphNode('teeth')
+        teeth.transform = tr.matmul([
+            tr.rotationZ(np.pi / 2),
+            tr.rotationX(np.pi/2),
+            tr.uniformScale(0.01),
+            tr.translate(0, 0, 0)])
+        teeth.childs += [gpu_teeth_quad]
 
         head_tr = sg.SceneGraphNode('head_tr')
         head_tr.transform = tr.identity()
-        head_tr.childs += [head]
+        head_tr.childs += [head, eyes, teeth]
 
         body = sg.SceneGraphNode('body')
         body.transform = tr.identity()
@@ -136,7 +157,7 @@ class Snake(object):
             tr.translate(
                 tx=view_pos[0],
                 ty=view_pos[1],
-                tz=1.8 * self.game.grid / 2
+                tz=0
             ),
             tr.rotationZ(theta)
         ])
@@ -282,18 +303,21 @@ class bodyCreator(object):
         self.game = game
         view_pos = get_pos(game.grid, game.size, pos)
 
-        gpu_body_quad = es.toGPUShape(bs.createTextureNormalsCube('libs/fig/body.png'), GL_REPEAT,
-                                      GL_LINEAR)
+        gpu_body_quad = es.toGPUShape(bs.readOBJ('libs/fig/body.obj', (0, 1, 0), status=False))
 
         body_sh = sg.SceneGraphNode('body_sh')
-        body_sh.transform = tr.uniformScale(1.7 * game.grid)
+        body_sh.transform = tr.matmul([
+            tr.rotationZ(np.pi / 2),
+            tr.rotationX(np.pi/2),
+            tr.uniformScale(0.01),
+            tr.translate(0, 0, 0)])
         body_sh.childs += [gpu_body_quad]
 
         body_sh_tr = sg.SceneGraphNode(f'body_sh_tr_{game.count_food}')
         body_sh_tr.transform = tr.translate(
             tx=view_pos[0],
             ty=view_pos[1],
-            tz=1.7 * self.game.grid / 2
+            tz=0
         )
         body_sh_tr.childs += [body_sh]
         body.childs = [body_sh_tr] + body.childs
@@ -307,7 +331,7 @@ class bodyCreator(object):
         self.model.transform = tr.translate(
             tx=view_pos[0],
             ty=view_pos[1],
-            tz=1.7 * self.game.grid / 2)
+            tz=0)
 
 
 class bodySnake(object):
@@ -560,7 +584,7 @@ class Background(object):
             glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation1"), 2.04)
             glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation1"), 1.78)
 
-            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation2"), 0.78)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation2"), 0.58)
             glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation2"), 3.3)
             glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation2"), 0)
 

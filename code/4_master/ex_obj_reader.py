@@ -72,14 +72,14 @@ def readOBJ(filename, color):
             count +=1
             aux = line.strip().split(' ')
             if aux[0] == 'v':
-                vertices += [[float(coord) for coord in aux[2:]]]
+                vertices += [[float(coord) for coord in aux[1:]]]
 
             elif aux[0] == 'vn':
                 normals += [[float(coord) for coord in aux[1:]]]
 
             elif aux[0] == 'vt':
-                # assert len(aux[1:]) == 2, "Texture coordinates with different than 2 dimensions are not supported"
-                textCoords += [[float(coord) for coord in aux[1:3]]]
+                assert len(aux[1:]) == 2, "Texture coordinates with different than 2 dimensions are not supported"
+                textCoords += [[float(coord) for coord in aux[1:]]]
 
             elif aux[0] == 'f':
                 N = len(aux)                
@@ -150,7 +150,7 @@ if __name__ == "__main__":
 
     # Creating shapes on GPU memory
     gpuAxis = es.toGPUShape(bs.createAxis(7))
-    gpuSuzanne = es.toGPUShape(shape = readOBJ('../../libs/fig/street_lamp.obj', (0.9, 0.6, 0.2)))
+    gpuSuzanne = es.toGPUShape(shape = readOBJ('../../libs/fig/teeth.obj', (0.9, 0.6, 0.2)))
 
     t0 = glfw.get_time()
     camera_theta = -3*np.pi/4
@@ -213,7 +213,7 @@ if __name__ == "__main__":
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE,
-                           tr.matmul([tr.rotationX(3.14/2), tr.uniformScale(0.005), tr.translate(0,-560,0)]))
+                           tr.matmul([tr.rotationX(np.pi/2), tr.uniformScale(0.5), tr.translate(0, 0, 0)]))
         pipeline.drawShape(gpuSuzanne)
 
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE,
