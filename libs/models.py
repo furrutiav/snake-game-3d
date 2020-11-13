@@ -15,7 +15,7 @@ class Game(object):
         self.size = n
         self.grid = 1 / n
         self.center = tuple(int(n / 2) for _ in range(2))
-        self.time = 1 / np.log(n) * [2, 10, 5, 1][0]
+        self.time = 1 / np.log(n) * [2, 10, 5, 1, 0.5][4]
         self.count_food = 0
         self.empty = set()
         for i in range(0, self.size):
@@ -39,8 +39,11 @@ class Game(object):
         self.view_cam = None
         # set
         self.numb = 0
+        self.cursor = 0, 0
         #
         self.view_pos = None
+        self.view_food = None
+
 
     def set_speed(self, s):
         self.time = s * 1 / np.log(self.size)
@@ -137,10 +140,11 @@ class Snake(object):
             ),
             tr.rotationZ(theta)
         ])
+        ctr = self.game.numb
         glUseProgram(pipeline.shaderProgram)
 
         # White light in all components: ambient, diffuse and specular.
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La1"), 0.0, 0.0, 0.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La1"), 0.8, 0.2, 0.0)
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld1"), 1.0, 1.0, 1.0)
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls1"), 1.0, 1.0, 1.0)
 
@@ -148,34 +152,68 @@ class Snake(object):
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld2"), 1.0, 1.0, 1.0)
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls2"), 1.0, 1.0, 1.0)
 
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La3"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld3"), 1, 0.01, 0.01)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls3"), 1.0, 0.3, 0.3)
+
         # Object is barely visible at only ambient. Bright white for diffuse and specular components.
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka1"), 0.2, 0.2, 0.2)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd1"), 0.9, 0.9, 0.9)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks1"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka1"), 0.008, 0.008, 0.008)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd1"), 0.5, 0.5, 0.5)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks1"), 0, 0, 0)
 
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka2"), 0, 0, 0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd2"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks2"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd2"), 0.7, 1.0, 0.7)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks2"), 0.5, 0.5, 0.5)
+
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka3"), -0.04, -0.04, -0.04)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd3"), 1.0, 0.7, 0.7)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks3"), 1, 1, 1)
 
         # TO DO: Explore different parameter combinations to understand their effect!
 
-        camPos = self.game.view_cam
-        snakePos = view_pos
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition1"), 0, -5, 8)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition2"), snakePos[0], snakePos[1], 0.1)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "viewPosition"), camPos[0], camPos[1],
-                    camPos[2])
+        viewPos = self.game.view_cam
+        snakePos = self.game.view_pos
+        foodPos = self.game.view_food
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition1"), 0, 0, 1.5)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition2"), snakePos[0], snakePos[1], 0.21)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition3"), foodPos[0], foodPos[1], 0.3)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "viewPosition"), viewPos[0], viewPos[1],
+                    viewPos[2])
 
-        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess1"), 100)
-        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess2"), -1)
+        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess1"), -1)
+        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess2"), 100)
+        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess3"), 100)
 
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation1"), 0.0001)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation1"), 0.03)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation1"), 0.01)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation1"), -1.93)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation1"), 2.04)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation1"), 1.78)
 
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation2"), -0.59)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation2"), 8.79)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation2"), 0.78)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation2"), 3.3)
         glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation2"), 0)
+
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation3"), 0.78)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation3"), 3.3)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation3"), 0)
+
+        lamps = {1: (1, 1), 2: (-1, 1), 3: (1, -1), 4: (-1, -1)}
+        for j in range(1, 5):
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"La{3 + j}"), 1.0, 1.0, 1.0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ld{3 + j}"), 1, 1, 1)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ls{3 + j}"), 1.0, 1.0, 1.0)
+
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ka{3 + j}"), -0.04, -0.04, -0.04)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Kd{3 + j}"), 0.95, 1.0, 1.0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ks{3 + j}"), 1, 1, 1)
+
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"lightPosition{3 + j}"),
+                        0.9 * lamps[j][0], 0.9 * lamps[j][1], 0.14)
+
+            glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, f"shininess{3 + j}"), 100)
+
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"constantAttenuation{3 + j}"), 0.63)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"linearAttenuation{3 + j}"), 0.59)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"quadraticAttenuation{3 + j}"), 4)
 
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
@@ -299,8 +337,9 @@ class Food(object):
         self.game = game
         self.pos = tuple(rd.randint(0, game.size - 1) for _ in range(2))
         self.view_pos = get_pos(game.grid, game.size, self.pos)
+        game.view_food = self.view_pos
 
-        gpu_food_quad = es.toGPUShape(bs.readOBJ('libs/fig/Light_Bulb_OBJ.obj', (1, 0, 0)))
+        gpu_food_obj = es.toGPUShape(bs.readOBJ('libs/fig/Light_Bulb_OBJ.obj', (1, 0, 0)))
         # bs.createColorNormalsCube(1, 0, 0)
 
         food = sg.SceneGraphNode('food')
@@ -309,7 +348,7 @@ class Food(object):
             tr.rotationX(np.pi/2),
             tr.uniformScale(0.00015),
             tr.translate(15700, -5900, -900)])
-        food.childs += [gpu_food_quad]
+        food.childs += [gpu_food_obj]
         food_tr = sg.SceneGraphNode('food_tr')
         food_tr.transform = tr.translate(
             tx=self.view_pos[0],
@@ -329,10 +368,11 @@ class Food(object):
                 tz=self.game.grid / 2),
             tr.rotationZ(theta)
         ])
+        ctr = self.game.numb
         glUseProgram(pipeline.shaderProgram)
 
         # White light in all components: ambient, diffuse and specular.
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La1"), 0.0, 0.0, 0.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La1"), 0.8, 0.2, 0.0)
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld1"), 1.0, 1.0, 1.0)
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls1"), 1.0, 1.0, 1.0)
 
@@ -340,34 +380,49 @@ class Food(object):
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld2"), 1.0, 1.0, 1.0)
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls2"), 1.0, 1.0, 1.0)
 
-        # Object is barely visible at only ambient. Bright white for diffuse and specular components.
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka1"), 0.2, 0.2, 0.2)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd1"), 0.9, 0.9, 0.9)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks1"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La3"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld3"), 1, 0.01, 0.01)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls3"), 1.0, 0.3, 0.3)
 
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka2"), 0, 0, 0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd2"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks2"), 1.0, 1.0, 1.0)
+        # Object is barely visible at only ambient. Bright white for diffuse and specular components.
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka1"), 0.008, 0.008, 0.008)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd1"), 0.5, 0.5, 0.5)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks1"), 0, 0, 0)
+
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka2"), 0.2, 0.2, 0.2)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd2"), 0.1, 0.1, 0.1)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks2"), 1, 1, 1)
+
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka3"), .3, .3, .3)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd3"), 1.0, 0.7, 0.7)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks3"), 0.36, 0.36, 0.36)
 
         # TO DO: Explore different parameter combinations to understand their effect!
 
         viewPos = self.game.view_cam
         snakePos = self.game.view_pos
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition1"), 0, -5, 8)
+        foodPos = self.game.view_food
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition1"), 0, 0, 1.5)
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition2"), snakePos[0], snakePos[1], 0.09)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition3"), foodPos[0], foodPos[1], 0.7)
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "viewPosition"), viewPos[0], viewPos[1],
                     viewPos[2])
 
-        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess1"), 100)
-        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess2"), -1)
+        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess1"), -1)
+        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess2"), 100)
+        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess3"), 100)
 
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation1"), 0.0001)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation1"), 0.03)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation1"), 0.01)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation1"), -1.93)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation1"), 2.04)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation1"), 1.78)
 
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation2"), -0.59)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation2"), 8.79)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation2"), 0.78)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation2"), 3.3)
         glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation2"), 0)
+
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation3"), 0.78)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation3"), 3.3)
+        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation3"), 0)
 
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
@@ -378,6 +433,7 @@ class Food(object):
         if choice != set():
             self.pos = rd.choice(list(choice))
             self.view_pos = get_pos(self.g_grid, self.g_size, self.pos)
+            self.game.view_food = self.view_pos
         else:
             self.game.notFood = True
 
@@ -391,60 +447,151 @@ class Background(object):
             bs.createTextureNormalsQuad(image, game.size, game.size), GL_REPEAT,
             GL_LINEAR)
 
+        gpu_lamp_obj = es.toGPUShape(
+            bs.readOBJ('libs/fig/street_lamp.obj', (0.1, 0.1, 0.1)))
+
+        gpu_light_cube = es.toGPUShape(
+            bs.createColorNormalsCube(1, 1, 1))
+
         BG = sg.SceneGraphNode('BG')
         BG.transform = tr.uniformScale(2)  # tr.scale(2, 2, 0.001)  #
         BG.childs += [gpu_BG_quad]
 
+        _lamp = sg.SceneGraphNode('_lamp')
+        _lamp.transform = tr.matmul([
+            tr.rotationZ(np.pi/4),
+            tr.rotationX(3.14/2),
+            tr.uniformScale(0.00045),
+            tr.translate(0, -560, 0)])
+        _lamp.childs += [gpu_lamp_obj]
+
+        light = sg.SceneGraphNode('light')
+        light.transform = tr.matmul([
+            tr.translate(0, 0, 0.35),
+            tr.uniformScale(0.03)])
+        light.childs += [gpu_light_cube]
+
+        lamp = sg.SceneGraphNode('lamp')
+        lamp.transform = tr.uniformScale(0.8)
+        lamp.childs += [_lamp, light]
+
+        lamp1 = sg.SceneGraphNode('lamp1')
+        lamp1.transform = tr.matmul([
+            tr.translate(1, 1, 0)
+        ])
+        lamp1.childs += [lamp]
+
+        lamp2 = sg.SceneGraphNode('lamp2')
+        lamp2.transform = tr.matmul([
+            tr.translate(-1, 1, 0)
+        ])
+        lamp2.childs += [lamp]
+
+        lamp3 = sg.SceneGraphNode('lamp3')
+        lamp3.transform = tr.matmul([
+            tr.translate(1, -1, 0)
+        ])
+        lamp3.childs += [lamp]
+
+        lamp4 = sg.SceneGraphNode('lamp4')
+        lamp4.transform = tr.matmul([
+            tr.translate(-1, -1, 0)
+        ])
+        lamp4.childs += [lamp]
+
+        lamps = sg.SceneGraphNode('lamps')
+        lamps.childs += [lamp1, lamp2, lamp3, lamp4]
+
         BG_tr = sg.SceneGraphNode('BG_tr')
         BG_tr.childs += [BG]
 
-        self.model = BG_tr
+        self.model_tx = BG_tr
+        self.model_col = lamps
 
-    def draw(self, pipeline, projection, view):
-        glUseProgram(pipeline.shaderProgram)
+    def draw(self, pipeline_tx, pipeline_col, projection, view):
+        ctr = self.game.numb
+        dict = {'tx': (pipeline_tx, self.model_tx), 'col': (pipeline_col, self.model_col)}
+        for p in ['tx', 'col']:
+            pipeline = dict[p][0]
+            glUseProgram(pipeline.shaderProgram)
 
-        # White light in all components: ambient, diffuse and specular.
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La1"), 0.5, 0.2, 0.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld1"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls1"), 1.0, 1.0, 1.0)
+            # White light in all components: ambient, diffuse and specular.
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La1"), 0.8, 0.2, 0.0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld1"), 1.0, 1.0, 1.0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls1"), 1.0, 1.0, 1.0)
 
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La2"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld2"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls2"), 1.0, 1.0, 1.0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La2"), 1.0, 1.0, 1.0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld2"), 1.0, 1.0, 1.0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls2"), 1.0, 1.0, 1.0)
 
-        # Object is barely visible at only ambient. Bright white for diffuse and specular components.
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka1"), 0.2, 0.2, 0.2)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd1"), 0.9, 0.9, 0.9)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks1"), 1.0, 1.0, 1.0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La3"), 1.0, 1.0, 1.0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld3"), 1, 0.01, 0.01)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls3"), 1.0, 0.3, 0.3)
 
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka2"), 0, 0, 0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd2"), 0.7, 1.0, 0.7)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks2"), 0.0, 0.0, 0.0)
+            # Object is barely visible at only ambient. Bright white for diffuse and specular components.
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka1"), 0.008, 0.008, 0.008)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd1"), 0.5, 0.5, 0.5)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks1"), 0, 0, 0)
 
-        # TO DO: Explore different parameter combinations to understand their effect!
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka2"), 0, 0, 0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd2"), 0.7, 1.0, 0.7)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks2"), 0.0, 0.0, 0.0)
 
-        viewPos = self.game.view_cam
-        snakePos = self.game.view_pos
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition1"), 0, -5, 8)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition2"), snakePos[0], snakePos[1], 0.09)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "viewPosition"), viewPos[0], viewPos[1],
-                    viewPos[2])
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka3"), -0.04, -0.04, -0.04)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd3"), 1.0, 0.7, 0.7)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks3"), 0.36, 0.36, 0.36)
 
-        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess1"), 100)
-        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess2"), -1)
+            # TO DO: Explore different parameter combinations to understand their effect!
 
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation1"), 0.0001)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation1"), 0.03)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation1"), 0.01)
+            viewPos = self.game.view_cam
+            snakePos = self.game.view_pos
+            foodPos = self.game.view_food
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition1"), 0, 0, 1.5)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition2"), snakePos[0], snakePos[1], 0.09)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition3"), foodPos[0], foodPos[1], 0.04)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "viewPosition"), viewPos[0], viewPos[1],
+                        viewPos[2])
 
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation2"), -0.59)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation2"), 8.79)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation2"), 0)
+            glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess1"), -1)
+            glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess2"), -1)
+            glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess3"), 100)
 
-        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
-        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
-        # Drawing
-        sg.drawSceneGraphNode(self.model, pipeline)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation1"), -1.93)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation1"), 2.04)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation1"), 1.78)
+
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation2"), 0.78)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation2"), 3.3)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation2"), 0)
+
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation3"), 0.78)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation3"), 3.3)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation3"), 0)
+
+            lamps = {1: (1, 1), 2: (-1, 1), 3: (1, -1), 4: (-1, -1)}
+            for j in range(1, 5):
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"La{3+j}"), 1.0, 1.0, 1.0)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ld{3+j}"), 1, 1, 1)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ls{3+j}"), 1.0, 1.0, 1.0)
+
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ka{3+j}"), -0.04, -0.04, -0.04)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Kd{3+j}"), 0.95, 1.0, 1.0)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ks{3+j}"), 0.5, 0.5, 0.5)
+
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"lightPosition{3+j}"),
+                            0.9*lamps[j][0], 0.9*lamps[j][1], 0.34)
+
+                glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, f"shininess{3+j}"), 100)
+
+                glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"constantAttenuation{3+j}"), 0.63)
+                glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"linearAttenuation{3+j}"), 0.59)
+                glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"quadraticAttenuation{3+j}"), 4)
+
+            glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
+            glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
+            # Drawing
+            model = dict[p][1]
+            sg.drawSceneGraphNode(model, pipeline)
 
 
 class interactiveWindow(object):

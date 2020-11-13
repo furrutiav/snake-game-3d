@@ -12,8 +12,8 @@ if __name__ == '__main__':
     if not glfw.init():
         sys.exit()
 
-    width = int(1920 * 0.8)
-    height = int(1080 * 0.8)
+    width = int(1920 * 0.9)
+    height = int(1080 * 0.9)
     window = glfw.create_window(
         width, height, 'Snake Game 3D; Autor: Felipe Urrutia V.', None, None)
 
@@ -29,14 +29,20 @@ if __name__ == '__main__':
 
     glfw.set_key_callback(window, controller.on_key)
     glfw.set_scroll_callback(window, controller.on_scroll)
+    # glfw.set_cursor_pos_callback(window, controller.on_cursor)
 
     pipeline_tx = es.SimpleTextureModelViewProjectionShaderProgram()
     pipeline_ls_tx = ls.SimpleTexturePhongShaderProgram()
     pipeline_ls_tx2 = ls.SimpleTexturePhongShaderProgramMulti(2)
+    pipeline_ls_tx3 = ls.SimpleTexturePhongShaderProgramMulti(3)
+    pipeline_ls_tx4 = ls.SimpleTexturePhongShaderProgramMulti(4)
+    pipeline_ls_tx7 = ls.SimpleTexturePhongShaderProgramMulti(7)
     pipeline_col = es.SimpleModelViewProjectionShaderProgram()
     pipeline_ls_col = ls.SimplePhongShaderProgram()
     pipeline_ls_col2 = ls.SimplePhongShaderProgramMulti(2)
     pipeline_ls_col3 = ls.SimplePhongShaderProgramMulti(3)
+    pipeline_ls_col4 = ls.SimplePhongShaderProgramMulti(4)
+    pipeline_ls_col7 = ls.SimplePhongShaderProgramMulti(7)
 
     glClearColor(48/255, 48/255, 48/255, 1.0)
 
@@ -96,13 +102,13 @@ if __name__ == '__main__':
 
         projection, view = cam.get_cam()
 
-        axis.draw(pipeline_col, projection, view)
+        # axis.draw(pipeline_col, projection, view)
 
-        bg.draw(pipeline_ls_tx2, projection, view)
+        bg.draw(pipeline_ls_tx7, pipeline_ls_col7, projection, view)
 
-        food.draw(pipeline_ls_col2, projection, view, ti)
+        food.draw(pipeline_ls_col3, projection, view, ti)
 
-        snake.draw(pipeline_ls_tx2, projection, view)
+        snake.draw(pipeline_ls_tx7, projection, view)
 
         if game.check_time():
             snake.update()
@@ -111,3 +117,4 @@ if __name__ == '__main__':
         glfw.swap_buffers(window)
         game.count_time()
     glfw.terminate()
+    # 1.5+0.5*np.sin(self.game.t*10)

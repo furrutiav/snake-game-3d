@@ -79,7 +79,7 @@ def readOBJ(filename, color):
 
             elif aux[0] == 'vt':
                 # assert len(aux[1:]) == 2, "Texture coordinates with different than 2 dimensions are not supported"
-                textCoords += [[float(coord) for coord in aux[1:2]]]
+                textCoords += [[float(coord) for coord in aux[1:3]]]
 
             elif aux[0] == 'f':
                 N = len(aux)                
@@ -95,7 +95,7 @@ def readOBJ(filename, color):
         for face in faces:
 
             # Checking each of the triangle vertices
-            for i in range(0,3):
+            for i in range(0, 3):
                 vertex = vertices[face[i][0]-1]
                 normal = normals[face[i][2]-1]
 
@@ -150,7 +150,7 @@ if __name__ == "__main__":
 
     # Creating shapes on GPU memory
     gpuAxis = es.toGPUShape(bs.createAxis(7))
-    gpuSuzanne = es.toGPUShape(shape = readOBJ('street_lamp.obj', (0.9, 0.6, 0.2)))
+    gpuSuzanne = es.toGPUShape(shape = readOBJ('../../libs/fig/street_lamp.obj', (0.9, 0.6, 0.2)))
 
     t0 = glfw.get_time()
     camera_theta = -3*np.pi/4

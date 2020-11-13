@@ -116,12 +116,20 @@ class Controller(object):
                 self.game.pause = True
 
             elif key == glfw.KEY_1:
-                self.game.numb -= 1
+                self.game.numb -= 0.1
                 print(self.game.numb)
             elif key == glfw.KEY_2:
-                self.game.numb += 1
+                self.game.numb += 0.1
                 print(self.game.numb)
 
     def on_scroll(self, window, pos, action):
-        self.game.numb += action*0.1
+        self.game.numb += action*0.01
         print(self.game.numb)
+
+    def on_cursor(self, window, xpos, ypos):
+        width = int(1920 * 0.6)
+        height = int(1080 * 0.6)
+        x = (xpos / width * 2) - 1
+        y = 1-(ypos / height * 2)
+        self.game.cursor = x, y
+        print(x, y)

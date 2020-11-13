@@ -417,7 +417,7 @@ def readOBJ(filename, color):
 
             elif aux[0] == 'vt':
                 # assert len(aux[1:]) == 2, "Texture coordinates with different than 2 dimensions are not supported"
-                textCoords += [[float(coord) for coord in aux[1:2]]]
+                textCoords += [[float(coord) for coord in aux[1:3]]]
 
             elif aux[0] == 'f':
                 N = len(aux)

@@ -1104,20 +1104,15 @@ def _multi_fragment_shader_code(size):
         {
             // ambient
         """
-    line = ""
     for i in range(1, size + 1):
         code += f"""
             vec3 ambient{i} = Ka{i} * La{i};
         """
-        line += f"ambient{i}+ "
-    line = line[:-2]
     code += """
-            vec3 ambient = (""" + line + """);
             // diffuse
             // fragment normal has been interpolated, so it does not necessarily have norm equal to 1
             vec3 normalizedNormal = normalize(fragNormal);
         """
-    line = ""
     for i in range(1, size + 1):
         code += f"""
             vec3 toLight{i} = lightPosition{i} - fragPosition;
@@ -1125,29 +1120,19 @@ def _multi_fragment_shader_code(size):
             float diff{i} = max(dot(normalizedNormal, lightDir{i}), 0.0);
             vec3 diffuse{i} = Kd{i} * Ld{i} * diff{i};
         """
-        line += f"diffuse{i}+ "
-    line = line[:-2]
     code += """
-            vec3 diffuse = (""" + line + """);
-
             // specular
             vec3 viewDir = normalize(viewPosition - fragPosition);
         """
-    line = ""
     for i in range(1, size + 1):
         code += f"""
             vec3 reflectDir{i} = reflect(-lightDir{i}, normalizedNormal);  
             float spec{i} = pow(max(dot(viewDir, reflectDir{i}), 0.0), shininess{i});
             vec3 specular{i} = Ks{i} * Ls{i} * spec{i};
         """
-        line += f"specular{i}+ "
-    line = line[:-2]
     code += """
-            vec3 specular = (""" + line + """);
-
             // attenuation
         """
-    line = ""
     for i in range(1, size + 1):
         code += f"""
             float distToLight{i} = length(toLight{i});
@@ -1155,12 +1140,12 @@ def _multi_fragment_shader_code(size):
                 + linearAttenuation{i} * distToLight{i}
                 + quadraticAttenuation{i} * distToLight{i} * distToLight{i};
             """
-        line += f"attenuation{i}+ "
+    line = ""
+    for i in range(1, size + 1):
+        line += f"(ambient{i} + ((diffuse{i} + specular{i}) / attenuation{i})) + "
     line = line[:-2]
     code += """
-            float attenuation = (""" + line + """);
-
-            vec3 result = (ambient + ((diffuse + specular) / attenuation)) * fragOriginalColor;
+            vec3 result = ( """ + line + """ ) * fragOriginalColor;
             fragColor = vec4(result, 1.0);
         }
         """
@@ -1200,20 +1185,15 @@ def tx_multi_fragment_shader_code(size):
         {
             // ambient
         """
-    line = ""
     for i in range(1, size + 1):
         code += f"""
             vec3 ambient{i} = Ka{i} * La{i};
         """
-        line += f"ambient{i}+ "
-    line = line[:-2]
     code += """
-            vec3 ambient = (""" + line + """);
             // diffuse
             // fragment normal has been interpolated, so it does not necessarily have norm equal to 1
             vec3 normalizedNormal = normalize(fragNormal);
         """
-    line = ""
     for i in range(1, size + 1):
         code += f"""
             vec3 toLight{i} = lightPosition{i} - fragPosition;
@@ -1221,29 +1201,19 @@ def tx_multi_fragment_shader_code(size):
             float diff{i} = max(dot(normalizedNormal, lightDir{i}), 0.0);
             vec3 diffuse{i} = Kd{i} * Ld{i} * diff{i};
         """
-        line += f"diffuse{i}+ "
-    line = line[:-2]
     code += """
-            vec3 diffuse = (""" + line + """);
-
             // specular
             vec3 viewDir = normalize(viewPosition - fragPosition);
         """
-    line = ""
     for i in range(1, size + 1):
         code += f"""
             vec3 reflectDir{i} = reflect(-lightDir{i}, normalizedNormal);  
             float spec{i} = pow(max(dot(viewDir, reflectDir{i}), 0.0), shininess{i});
             vec3 specular{i} = Ks{i} * Ls{i} * spec{i};
         """
-        line += f"specular{i}+ "
-    line = line[:-2]
     code += """
-            vec3 specular = (""" + line + """);
-
             // attenuation
         """
-    line = ""
     for i in range(1, size + 1):
         code += f"""
             float distToLight{i} = length(toLight{i});
@@ -1251,15 +1221,16 @@ def tx_multi_fragment_shader_code(size):
                 + linearAttenuation{i} * distToLight{i}
                 + quadraticAttenuation{i} * distToLight{i} * distToLight{i};
             """
-        line += f"attenuation{i}+ "
+    line = ""
+    for i in range(1, size + 1):
+        line += f"(ambient{i} + ((diffuse{i} + specular{i}) / attenuation{i})) + "
     line = line[:-2]
-    code += """
-            float attenuation = (""" + line + """);
-            
+    code += f"""            
             vec4 fragOriginalColor = texture(samplerTex, fragTexCoords);
-
-            vec3 result = (ambient + ((diffuse + specular) / attenuation)) * fragOriginalColor.rgb;
+            // ambient + ((diffuse + specular) / attenuation)
+            vec3 result = ( """ + line + """ ) * fragOriginalColor.rgb;
             fragColor = vec4(result, 1.0);
         }
         """
+    # (code)
     return code
