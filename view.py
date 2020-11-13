@@ -8,14 +8,14 @@ from libs.controller import Controller
 
 N = 20  # int(sys.argv[1])
 
-if __name__ == '__main__':
+if __name__=='__main__':
     if not glfw.init():
         sys.exit()
 
     width = int(1920 * 0.9)
     height = int(1080 * 0.9)
     window = glfw.create_window(
-        width, height, 'Snake Game 3D; Autor: Felipe Urrutia V.', None, None)
+        width, height, 'Snake Game 3D; Autor: F. Urrutia V.', None, None)
 
     if not window:
         glfw.terminate()
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     game = Game(N)
 
     glfw.set_key_callback(window, controller.on_key)
-    glfw.set_scroll_callback(window, controller.on_scroll)
+    # glfw.set_scroll_callback(window, controller.on_scroll)
     # glfw.set_cursor_pos_callback(window, controller.on_cursor)
 
     pipeline_tx = es.SimpleTextureModelViewProjectionShaderProgram()
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     pipeline_ls_col4 = ls.SimplePhongShaderProgramMulti(4)
     pipeline_ls_col7 = ls.SimplePhongShaderProgramMulti(7)
 
-    glClearColor(48/255, 48/255, 48/255, 1.0)
+    glClearColor(48 / 255, 48 / 255, 48 / 255, 1.0)
 
     glEnable(GL_DEPTH_TEST)
 
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     snake = Snake(game, food)
     iW = interactiveWindow()
     cam = Cam(game)
-    bg = Background(game, cam, "bricks.png")
+    bg = Background(game, cam, 'libs/fig/bricks.png')
 
     controller.set_snake(snake)
     controller.set_game(game)
@@ -102,7 +102,7 @@ if __name__ == '__main__':
 
         projection, view = cam.get_cam()
 
-        # axis.draw(pipeline_col, projection, view)
+        axis.draw(pipeline_col, projection, view)
 
         bg.draw(pipeline_ls_tx7, pipeline_ls_col7, projection, view)
 
@@ -117,4 +117,3 @@ if __name__ == '__main__':
         glfw.swap_buffers(window)
         game.count_time()
     glfw.terminate()
-    # 1.5+0.5*np.sin(self.game.t*10)

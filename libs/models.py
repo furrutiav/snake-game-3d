@@ -97,9 +97,9 @@ class Snake(object):
         # time
         self.t0 = 0
 
-        gpu_head_quad = es.toGPUShape(bs.readOBJ('libs/fig/head.obj', (0.4, 1, 0.4), status=False))
-        gpu_eyes_quad = es.toGPUShape(bs.readOBJ('libs/fig/eyes.obj', (1, 0.2, 0.2), status=False))
-        gpu_teeth_quad = es.toGPUShape(bs.readOBJ('libs/fig/teeth.obj', (0.8, .8, .8), status=False))
+        gpu_head_quad = es.toGPUShape(bs.readOBJ('libs/obj/head.obj', (0.4, 1, 0.4), status=False))
+        gpu_eyes_quad = es.toGPUShape(bs.readOBJ('libs/obj/eyes.obj', (1, 0.2, 0.2), status=False))
+        gpu_teeth_quad = es.toGPUShape(bs.readOBJ('libs/obj/teeth.obj', (0.8, .8, .8), status=False))
 
         head = sg.SceneGraphNode('head')
         head.transform = tr.matmul([
@@ -303,7 +303,7 @@ class bodyCreator(object):
         self.game = game
         view_pos = get_pos(game.grid, game.size, pos)
 
-        gpu_body_quad = es.toGPUShape(bs.readOBJ('libs/fig/body.obj', (0.4, 1, 0.4), status=False))
+        gpu_body_quad = es.toGPUShape(bs.readOBJ('libs/obj/body.obj', (0.4, 1, 0.4), status=False))
 
         body_sh = sg.SceneGraphNode('body_sh')
         body_sh.transform = tr.matmul([
@@ -363,7 +363,7 @@ class Food(object):
         self.view_pos = get_pos(game.grid, game.size, self.pos)
         game.view_food = self.view_pos
 
-        gpu_food_obj = es.toGPUShape(bs.readOBJ('libs/fig/Light_Bulb_OBJ.obj', (1, 0, 0)))
+        gpu_food_obj = es.toGPUShape(bs.readOBJ('libs/obj/lightBulb.obj', (1, 0, 0)))
         # bs.createColorNormalsCube(1, 0, 0)
 
         food = sg.SceneGraphNode('food')
@@ -472,7 +472,7 @@ class Background(object):
             GL_LINEAR)
 
         gpu_lamp_obj = es.toGPUShape(
-            bs.readOBJ('libs/fig/street_lamp.obj', (0.1, 0.1, 0.1)))
+            bs.readOBJ('libs/obj/streetLamp.obj', (0.1, 0.1, 0.1)))
 
         gpu_light_cube = es.toGPUShape(
             bs.createColorNormalsCube(1, 1, 1))
@@ -738,7 +738,7 @@ class Cam(object):
             return self.get_cam_map()
 
 
-def get_pos(grid, size, pos, next_pos = None, current = None, i = 0, m = 1):
+def get_pos(grid, size, pos, next_pos=None, current=None, i=0, m=1):
     if current is None:
         return tuple(
             grid * ((size - 1) * (-1) ** (t + 1)
@@ -754,7 +754,7 @@ def get_pos(grid, size, pos, next_pos = None, current = None, i = 0, m = 1):
             for t in range(2))
 
 
-def get_theta(theta_1, theta_2, i = 0, m = 1):
+def get_theta(theta_1, theta_2, i=0, m=1):
     if theta_1 == 0 and theta_2 == 3 * np.pi / 2:
         return (i / m) * (-np.pi / 2) + (1 - i / m) * theta_1
     elif theta_2 == 0 and theta_1 == 3 * np.pi / 2:

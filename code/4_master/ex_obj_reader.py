@@ -150,7 +150,7 @@ if __name__ == "__main__":
 
     # Creating shapes on GPU memory
     gpuAxis = es.toGPUShape(bs.createAxis(7))
-    gpuSuzanne = es.toGPUShape(shape = readOBJ('../../libs/fig/teeth.obj', (0.9, 0.6, 0.2)))
+    gpuSuzanne = es.toGPUShape(shape = readOBJ('walls.obj', (0.9, 0.6, 0.2)))
 
     t0 = glfw.get_time()
     camera_theta = -3*np.pi/4
@@ -213,12 +213,12 @@ if __name__ == "__main__":
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE,
-                           tr.matmul([tr.rotationX(np.pi/2), tr.uniformScale(0.5), tr.translate(0, 0, 0)]))
+                           tr.matmul([tr.rotationX(np.pi/2), tr.uniformScale(0.01), tr.translate(2500, 0, -2000)]))
         pipeline.drawShape(gpuSuzanne)
 
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE,
             tr.matmul([
-                tr.uniformScale(3),
+                tr.uniformScale(10),
                 tr.rotationX(np.pi/2),
                 tr.translate(1.5,-0.25,0)])
         )
