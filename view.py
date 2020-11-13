@@ -9,14 +9,14 @@ from time import sleep
 
 N = 20  # int(sys.argv[1])
 
-if __name__=='__main__':
+if __name__ == '__main__':
     if not glfw.init():
         sys.exit()
 
-    width = int(1920 * 0.9)
-    height = int(1080 * 0.9)
+    width = int(1920 * 1)
+    height = int(1080 * 1)
     window = glfw.create_window(
-        width, height, 'Snake Game 3D; Autor: F. Urrutia V.', None, None)
+        width, height, 'Snake Game 3D; Autor: F. Urrutia V.', glfw.get_primary_monitor(), None)   # glfw.get_primary_monitor()
 
     if not window:
         glfw.terminate()
@@ -29,7 +29,7 @@ if __name__=='__main__':
     game = Game(N)
 
     glfw.set_key_callback(window, controller.on_key)
-    # glfw.set_scroll_callback(window, controller.on_scroll)
+    glfw.set_scroll_callback(window, controller.on_scroll)
     # glfw.set_cursor_pos_callback(window, controller.on_cursor)
 
     pipeline_tx = es.SimpleTextureModelViewProjectionShaderProgram()
@@ -47,7 +47,7 @@ if __name__=='__main__':
 
     pipeline_tx_2d = es.SimpleTextureTransformShaderProgram()
 
-    glClearColor(48 / 255, 48 / 255, 48 / 255, 1.0)
+    glClearColor(8 / 255, 8 / 255, 8 / 255, 1.0)
 
     glEnable(GL_DEPTH_TEST)
 

@@ -213,7 +213,8 @@ if __name__ == "__main__":
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE,
-                           tr.matmul([tr.rotationX(np.pi/2), tr.uniformScale(0.01), tr.translate(2500, 0, -2000)]))
+                           tr.matmul([tr.rotationX(np.pi/2), tr.uniformScale(0.01), tr.translate(0, 0, 0)]))
+        # tr.matmul([tr.rotationX(np.pi/2), tr.uniformScale(0.01), tr.translate(2500, 0, -2000)])
         pipeline.drawShape(gpuSuzanne)
 
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE,

@@ -59,7 +59,7 @@ class Controller(object):
 
         elif self.game.speed:
             if key == glfw.KEY_1:
-                self.game.set_speed(2)
+                self.game.set_speed(1.5)
                 self.game.update()
                 self.game.time_pause = 0
 
@@ -69,7 +69,7 @@ class Controller(object):
                 self.game.time_pause = 0
 
             elif key == glfw.KEY_3:
-                self.game.set_speed(0.5)
+                self.game.set_speed(0.7)
                 self.game.update()
                 self.game.time_pause = 0
 
@@ -103,7 +103,10 @@ class Controller(object):
                         self.snake.set_key(self.dirs[key])
 
             if key == glfw.KEY_R and self.cam.status != 'R':
-                self.count = dict(zip(self.clock.values(), self.clock.keys()))[self.snake.key]
+                snake_key = self.snake.key
+                if self.snake.key == (0, 0):
+                    snake_key = (0, -1)
+                self.count = dict(zip(self.clock.values(), self.clock.keys()))[snake_key]
                 self.cam.status = 'R'
 
             elif key == glfw.KEY_E and self.cam.status != 'E':
@@ -116,14 +119,14 @@ class Controller(object):
                 self.game.pause = True
 
             elif key == glfw.KEY_1:
-                self.game.numb -= 0.1
+                self.game.numb -= 1
                 print(self.game.numb)
             elif key == glfw.KEY_2:
-                self.game.numb += 0.1
+                self.game.numb += 1
                 print(self.game.numb)
 
     def on_scroll(self, window, pos, action):
-        self.game.numb += action*0.01
+        self.game.numb += action*0.1
         print(self.game.numb)
 
     def on_cursor(self, window, xpos, ypos):

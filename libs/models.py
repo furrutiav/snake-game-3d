@@ -15,7 +15,7 @@ class Game(object):
         self.size = n
         self.grid = 1 / n
         self.center = tuple(int(n / 2) for _ in range(2))
-        self.time = 1 / np.log(n) * [2, 10, 5, 1, 0.5][4]
+        self.time = 1 / np.log(n) * [2, 10, 5, 1, 0.6][4]
         self.count_food = 0
         self.empty = set()
         for i in range(0, self.size):
@@ -45,7 +45,7 @@ class Game(object):
         self.view_food = None
 
     def set_speed(self, s):
-        self.time = s * 1 / np.log(self.size)
+        self.time *= s
 
     def post_time(self, t0):
         self.dt = [0.005, (self.dt + t0 - self.t + 0.005) / 3, (self.dt + t0 - self.t) / 2][0]
@@ -362,7 +362,7 @@ class Food(object):
         self.view_pos = get_pos(game.grid, game.size, self.pos)
         game.view_food = self.view_pos
 
-        gpu_food_obj = es.toGPUShape(bs.readOBJ('libs/obj/lightBulb.obj', (1, 0, 0)))
+        gpu_food_obj = es.toGPUShape(bs.readOBJ('libs/obj/lightBulb.obj', (1, 0.1, 0.1)))
         # bs.createColorNormalsCube(1, 0, 0)
 
         food = sg.SceneGraphNode('food')
@@ -476,6 +476,14 @@ class Background(object):
         gpu_light_cube = es.toGPUShape(
             bs.createColorNormalsCube(1, 1, 1))
 
+        gpu_wall_cube_h = es.toGPUShape(
+            bs.createTextureNormalsQuad('libs/fig/bricks.png', game.size+1, 1), GL_REPEAT,
+            GL_LINEAR)
+
+        gpu_wall_cube_v = es.toGPUShape(
+            bs.createTextureNormalsQuad('libs/fig/bricks.png', game.size, 1), GL_REPEAT,
+            GL_LINEAR)
+
         BG = sg.SceneGraphNode('BG')
         BG.transform = tr.uniformScale(2)  # tr.scale(2, 2, 0.001)  #
         BG.childs += [gpu_BG_quad]
@@ -525,8 +533,65 @@ class Background(object):
         lamps = sg.SceneGraphNode('lamps')
         lamps.childs += [lamp1, lamp2, lamp3, lamp4]
 
+        wall_v = sg.SceneGraphNode('wall_v')
+        wall_v.transform = tr.matmul([
+            tr.rotationX(np.pi/2),
+            tr.uniformScale(2*game.grid),
+            tr.translate(
+                tx=0,
+                ty=0.5,
+                tz=0),
+            tr.scale(game.size, 1, 1)])
+        wall_v.childs += [gpu_wall_cube_v]
+
+        wall_h = sg.SceneGraphNode('wall_h')
+        wall_h.transform = tr.matmul([
+            tr.rotationX(0),
+            tr.uniformScale(2*game.grid),
+            tr.translate(
+                tx=0.5,
+                ty=0.5,
+                tz=1),
+            tr.scale(game.size+1, 1, 1)])
+        wall_h.childs += [gpu_wall_cube_h]
+
+        wall = sg.SceneGraphNode('wall')
+        wall.childs += [wall_h, wall_v]
+
+        wall1 = sg.SceneGraphNode('wall1')
+        wall1.transform = tr.translate(
+            tx=0,
+            ty=1,
+            tz=0
+        )
+        wall1.childs += [wall]
+
+        wall2 = sg.SceneGraphNode('wall2')
+        wall2.transform = tr.matmul([tr.translate(
+            tx=0,
+            ty=-1,
+            tz=0),
+            tr.rotationZ(np.pi)])
+        wall2.childs += [wall]
+
+        wall3 = sg.SceneGraphNode('wall3')
+        wall3.transform = tr.matmul([tr.translate(
+            tx=-1,
+            ty=0,
+            tz=0),
+            tr.rotationZ(np.pi/2)])
+        wall3.childs += [wall]
+
+        wall4 = sg.SceneGraphNode('wall4')
+        wall4.transform = tr.matmul([tr.translate(
+            tx=1,
+            ty=0,
+            tz=0),
+            tr.rotationZ(-np.pi/2)])
+        wall4.childs += [wall]
+
         BG_tr = sg.SceneGraphNode('BG_tr')
-        BG_tr.childs += [BG]
+        BG_tr.childs += [BG, wall1, wall2, wall3, wall4]
 
         self.model_tx = BG_tr
         self.model_col = lamps
@@ -697,13 +762,13 @@ class Cam(object):
         ratio = 16 / 9
         self.projection = [
             tr.ortho(-1.1 * ratio, 1.1 * ratio, -1.1, 1.1, 0.1, 100),
-            tr.perspective(2 * np.pi, ratio, 0.1, 1000),
-            tr.perspective(1.5 * np.pi, ratio, 0.1, 1000)
+            tr.perspective(2.2 * np.pi, ratio, 0.1, 100),
+            tr.perspective(2 * np.pi, ratio, 0.1, 100)
         ]
 
     def get_cam_gta(self):
-        view_cam = np.array([10 * np.sin(self.game.cam_angle) + self.game.view_pos[0],
-                             -10 * np.cos(self.game.cam_angle) + self.game.view_pos[1], 5])
+        view_cam = np.array([7 * np.sin(self.game.cam_angle) + self.game.view_pos[0],
+                             -7 * np.cos(self.game.cam_angle) + self.game.view_pos[1], 6.1])
         self.game.view_cam = view_cam
         view_gta = tr.lookAt(
             view_cam,
@@ -720,9 +785,9 @@ class Cam(object):
         return self.projection[0], view_map
 
     def get_cam_pers(self):
-        self.game.view_cam = np.array([0, -10, 10])
+        self.game.view_cam = np.array([0, -10.8, 10])
         view_pers = tr.lookAt(
-            np.array([0, -10, 10]),
+            np.array([0, -10.8, 10]),
             np.array([0, 0, 0]),
             np.array([0, 0, 1]))
         return self.projection[1], view_pers
