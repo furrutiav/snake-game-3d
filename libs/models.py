@@ -148,7 +148,7 @@ class Snake(object):
         self.g_size = self.game.size
         self.g_center = self.game.center
 
-    def draw(self, pipeline, projection, view):
+    def draw(self, pipeline, projection, view, size):
         view_pos = get_pos(self.g_grid, self.g_size, self.pos, self.next,
                            self.current_pos, i=self.game.count, m=self.game.time / self.game.dt)
         theta = get_theta(self.theta, self.new_theta, i=self.game.count - self.t0,
@@ -163,7 +163,6 @@ class Snake(object):
             ),
             tr.rotationZ(theta)
         ])
-        ctr = self.game.numb
         glUseProgram(pipeline.shaderProgram)
 
         # White light in all components: ambient, diffuse and specular.
@@ -220,7 +219,7 @@ class Snake(object):
         glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation3"), 0)
 
         lamps = {1: (1, 1), 2: (-1, 1), 3: (1, -1), 4: (-1, -1)}
-        for j in range(1, 5):
+        for j in range(1, size+1):
             glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"La{3 + j}"), 1.0, 1.0, 1.0)
             glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ld{3 + j}"), 1, 1, 1)
             glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ls{3 + j}"), 1.0, 1.0, 1.0)
@@ -600,8 +599,7 @@ class Background(object):
         self.model_tx = BG_tr
         self.model_col = lamps
 
-    def draw(self, pipeline_tx, pipeline_col, projection, view):
-        ctr = self.game.numb
+    def draw(self, pipeline_tx, pipeline_col, projection, view, size):
         dict = {'tx': (pipeline_tx, self.model_tx), 'col': (pipeline_col, self.model_col)}
         for p in ['tx', 'col']:
             pipeline = dict[p][0]
@@ -661,7 +659,7 @@ class Background(object):
             glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation3"), 0)
 
             lamps = {1: (1, 1), 2: (-1, 1), 3: (1, -1), 4: (-1, -1)}
-            for j in range(1, 5):
+            for j in range(1, size+1):
                 glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"La{3 + j}"), 1.0, 1.0, 1.0)
                 glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ld{3 + j}"), 1, 1, 1)
                 glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ls{3 + j}"), 1.0, 1.0, 1.0)

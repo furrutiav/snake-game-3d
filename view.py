@@ -32,18 +32,8 @@ if __name__ == '__main__':
     glfw.set_scroll_callback(window, controller.on_scroll)
     # glfw.set_cursor_pos_callback(window, controller.on_cursor)
 
-    pipeline_tx = es.SimpleTextureModelViewProjectionShaderProgram()
-    pipeline_ls_tx = ls.SimpleTexturePhongShaderProgram()
-    pipeline_ls_tx2 = ls.SimpleTexturePhongShaderProgramMulti(2)
-    pipeline_ls_tx3 = ls.SimpleTexturePhongShaderProgramMulti(3)
-    pipeline_ls_tx4 = ls.SimpleTexturePhongShaderProgramMulti(4)
-    pipeline_ls_tx7 = ls.SimpleTexturePhongShaderProgramMulti(7)
-    pipeline_col = es.SimpleModelViewProjectionShaderProgram()
-    pipeline_ls_col = ls.SimplePhongShaderProgram()
-    pipeline_ls_col2 = ls.SimplePhongShaderProgramMulti(2)
-    pipeline_ls_col3 = ls.SimplePhongShaderProgramMulti(3)
-    pipeline_ls_col4 = ls.SimplePhongShaderProgramMulti(4)
-    pipeline_ls_col7 = ls.SimplePhongShaderProgramMulti(7)
+    pipelines_ls_col = [ls.SimplePhongShaderProgramMulti(i) for i in range(3, 8)]
+    pipelines_ls_tx = [ls.SimpleTexturePhongShaderProgramMulti(i) for i in range(3, 8)]
 
     pipeline_tx_2d = es.SimpleTextureTransformShaderProgram()
 
@@ -109,13 +99,17 @@ if __name__ == '__main__':
         else:
             projection, view = cam.get_cam()
 
-            axis.draw(pipeline_col, projection, view)
+            # axis.draw(pipeline_col, projection, view)
 
-            bg.draw(pipeline_ls_tx7, pipeline_ls_col7, projection, view)
+            top = game.count_food
+            if top > 3:
+                top = 4
 
-            food.draw(pipeline_ls_col3, projection, view, ti)
+            bg.draw(pipelines_ls_tx[top], pipelines_ls_col[top], projection, view, top)
 
-            snake.draw(pipeline_ls_col7, projection, view)
+            food.draw(pipelines_ls_col[0], projection, view, ti)
+
+            snake.draw(pipelines_ls_col[top], projection, view, top)
 
         if game.check_time():
             snake.update()
