@@ -97,9 +97,9 @@ class Snake(object):
         # time
         self.t0 = 0
 
-        gpu_head_quad = es.toGPUShape(bs.readOBJ('libs/fig/head.obj', (0, 1, 0), status=False))
-        gpu_eyes_quad = es.toGPUShape(bs.readOBJ('libs/fig/eyes.obj', (1, 0, 0), status=False))
-        gpu_teeth_quad = es.toGPUShape(bs.readOBJ('libs/fig/teeth.obj', (1, 1, 1), status=False))
+        gpu_head_quad = es.toGPUShape(bs.readOBJ('libs/fig/head.obj', (0.4, 1, 0.4), status=False))
+        gpu_eyes_quad = es.toGPUShape(bs.readOBJ('libs/fig/eyes.obj', (1, 0.2, 0.2), status=False))
+        gpu_teeth_quad = es.toGPUShape(bs.readOBJ('libs/fig/teeth.obj', (0.8, .8, .8), status=False))
 
         head = sg.SceneGraphNode('head')
         head.transform = tr.matmul([
@@ -188,7 +188,7 @@ class Snake(object):
 
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka3"), -0.04, -0.04, -0.04)
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd3"), 1.0, 0.7, 0.7)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks3"), 1, 1, 1)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks3"), 0.36, 0.36, 0.36)
 
         # TO DO: Explore different parameter combinations to understand their effect!
 
@@ -196,8 +196,8 @@ class Snake(object):
         snakePos = self.game.view_pos
         foodPos = self.game.view_food
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition1"), 0, 0, 1.5)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition2"), snakePos[0], snakePos[1], 0.21)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition3"), foodPos[0], foodPos[1], 0.3)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition2"), snakePos[0], snakePos[1], 0.24)
+        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition3"), foodPos[0], foodPos[1], 0.1)
         glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "viewPosition"), viewPos[0], viewPos[1],
                     viewPos[2])
 
@@ -303,7 +303,7 @@ class bodyCreator(object):
         self.game = game
         view_pos = get_pos(game.grid, game.size, pos)
 
-        gpu_body_quad = es.toGPUShape(bs.readOBJ('libs/fig/body.obj', (0, 1, 0), status=False))
+        gpu_body_quad = es.toGPUShape(bs.readOBJ('libs/fig/body.obj', (0.4, 1, 0.4), status=False))
 
         body_sh = sg.SceneGraphNode('body_sh')
         body_sh.transform = tr.matmul([
