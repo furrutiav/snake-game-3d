@@ -102,6 +102,7 @@ class Snake(object):
 
         head = sg.SceneGraphNode('head')
         head.transform = tr.matmul([
+            tr.uniformScale(0.9),
             tr.rotationZ(np.pi / 2),
             tr.rotationX(np.pi / 2),
             tr.uniformScale(0.01),
@@ -110,6 +111,7 @@ class Snake(object):
 
         eyes = sg.SceneGraphNode('eyes')
         eyes.transform = tr.matmul([
+            tr.uniformScale(0.9),
             tr.rotationZ(np.pi / 2),
             tr.rotationX(np.pi / 2),
             tr.uniformScale(0.01),
@@ -118,6 +120,7 @@ class Snake(object):
 
         teeth = sg.SceneGraphNode('teeth')
         teeth.transform = tr.matmul([
+            tr.uniformScale(0.9),
             tr.rotationZ(np.pi / 2),
             tr.rotationX(np.pi / 2),
             tr.uniformScale(0.01),
@@ -306,6 +309,7 @@ class bodyCreator(object):
 
         body_sh = sg.SceneGraphNode('body_sh')
         body_sh.transform = tr.matmul([
+            tr.uniformScale(0.8),
             tr.rotationZ(np.pi / 2),
             tr.rotationX(np.pi / 2),
             tr.uniformScale(0.01),
@@ -370,7 +374,7 @@ class Food(object):
             tr.uniformScale(0.8 * game.grid),
             tr.rotationX(np.pi / 2),
             tr.uniformScale(0.00015),
-            tr.translate(15700, -5900, -900)])
+            tr.translate(15700, -4900, 200)])
         food.childs += [gpu_food_obj]
         food_tr = sg.SceneGraphNode('food_tr')
         food_tr.transform = tr.translate(
@@ -389,7 +393,7 @@ class Food(object):
                 tx=self.view_pos[0],
                 ty=self.view_pos[1],
                 tz=self.game.grid / 2),
-            tr.rotationZ(theta)
+            tr.rotationZ(1.5*theta)
         ])
         ctr = self.game.numb
         glUseProgram(pipeline.shaderProgram)
@@ -669,7 +673,8 @@ class Background(object):
                 glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"lightPosition{3 + j}"),
                             0.9 * lamps[j][0], 0.9 * lamps[j][1], 0.34)
 
-                glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, f"shininess{3 + j}"), 100)
+                glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, f"shininess{3 + j}"),
+                             int(90+10*(np.sin(8*lamps[j][0]*self.game.t) + np.cos(5*lamps[j][1]*self.game.t))))
 
                 glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"constantAttenuation{3 + j}"), 0.63)
                 glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"linearAttenuation{3 + j}"), 0.59)
