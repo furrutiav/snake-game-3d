@@ -40,7 +40,7 @@ class Controller(object):
         self.cam = c
 
     def on_key(self, window, key, scancode, action, mods):
-        if not (action == glfw.PRESS ):# or action == glfw.RELEASE
+        if not (action == glfw.PRESS):
             return
 
         if self.game.pause:

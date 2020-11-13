@@ -2,8 +2,7 @@
 -----------> MODELS <-----------
 """
 
-from libs import basic_shapes as bs, transformations as tr, easy_shaders as es, scene_graph as sg, \
-    lighting_shaders as ls
+from libs import basic_shapes as bs, transformations as tr, easy_shaders as es, scene_graph as sg, lighting_shaders as ls
 import numpy as np
 from OpenGL.GL import *
 import random as rd
@@ -269,7 +268,7 @@ class Snake(object):
                     not self.pos[1] in set(range(0, self.g_size)) \
                     or (self.pos in self.tail):
                 self.dead()
-            if self.pos==self.food.pos:
+            if self.pos == self.food.pos:
                 self.eat()
 
     def eat(self):
@@ -294,7 +293,7 @@ class Snake(object):
             self.game.dead = True
 
     def is_new_dir(self, k):
-        return sum([self.dir[i] * k[i] for i in range(2)])==0
+        return sum([self.dir[i] * k[i] for i in range(2)]) == 0
 
 
 class bodyCreator(object):
@@ -366,7 +365,6 @@ class Food(object):
         game.view_food = self.view_pos
 
         gpu_food_obj = es.toGPUShape(bs.readOBJ('libs/obj/lightBulb.obj', (1, 0.1, 0.1)))
-        # bs.createColorNormalsCube(1, 0, 0)
 
         food = sg.SceneGraphNode('food')
         food.transform = tr.matmul([
@@ -456,7 +454,7 @@ class Food(object):
 
     def update(self, snake):
         choice = self.game.empty - set(snake.tail) - {snake.pos}
-        if choice!=set():
+        if choice != set():
             self.pos = rd.choice(list(choice))
             self.view_pos = get_pos(self.g_grid, self.g_size, self.pos)
             self.game.view_food = self.view_pos
@@ -796,13 +794,13 @@ class Cam(object):
         return self.projection[1], view_pers
 
     def get_cam(self):
-        if self.status == 'R':  # gta
+        if self.status == 'R':
             return self.get_cam_gta()
 
-        elif self.status == 'T':  # perspective
+        elif self.status == 'T':
             return self.get_cam_pers()
 
-        elif self.status == 'E':  # map
+        elif self.status == 'E':
             return self.get_cam_map()
 
 

@@ -30,7 +30,6 @@ if __name__ == '__main__':
 
     glfw.set_key_callback(window, controller.on_key)
     glfw.set_scroll_callback(window, controller.on_scroll)
-    # glfw.set_cursor_pos_callback(window, controller.on_cursor)
 
     pipelines_ls_col = [ls.SimplePhongShaderProgramMulti(i) for i in range(3, 8)]
     pipelines_ls_tx = [ls.SimpleTexturePhongShaderProgramMulti(i) for i in range(3, 8)]
@@ -98,8 +97,6 @@ if __name__ == '__main__':
                     game.time_pause = 2*np.pi
         else:
             projection, view = cam.get_cam()
-
-            # axis.draw(pipeline_col, projection, view)
 
             top = game.count_food
             if top > 3:
