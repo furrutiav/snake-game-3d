@@ -40,10 +40,9 @@ class Game(object):
         # set
         self.numb = 0
         self.cursor = 0, 0
-        #
+        # shaders
         self.view_pos = None
         self.view_food = None
-
 
     def set_speed(self, s):
         self.time = s * 1 / np.log(self.size)
@@ -104,7 +103,7 @@ class Snake(object):
         head = sg.SceneGraphNode('head')
         head.transform = tr.matmul([
             tr.rotationZ(np.pi / 2),
-            tr.rotationX(np.pi/2),
+            tr.rotationX(np.pi / 2),
             tr.uniformScale(0.01),
             tr.translate(0, 0, 0)])
         head.childs += [gpu_head_quad]
@@ -112,7 +111,7 @@ class Snake(object):
         eyes = sg.SceneGraphNode('eyes')
         eyes.transform = tr.matmul([
             tr.rotationZ(np.pi / 2),
-            tr.rotationX(np.pi/2),
+            tr.rotationX(np.pi / 2),
             tr.uniformScale(0.01),
             tr.translate(0, 0, 0)])
         eyes.childs += [gpu_eyes_quad]
@@ -120,7 +119,7 @@ class Snake(object):
         teeth = sg.SceneGraphNode('teeth')
         teeth.transform = tr.matmul([
             tr.rotationZ(np.pi / 2),
-            tr.rotationX(np.pi/2),
+            tr.rotationX(np.pi / 2),
             tr.uniformScale(0.01),
             tr.translate(0, 0, 0)])
         teeth.childs += [gpu_teeth_quad]
@@ -268,7 +267,7 @@ class Snake(object):
                     not self.pos[1] in set(range(0, self.g_size)) \
                     or (self.pos in self.tail):
                 self.dead()
-            if self.pos == self.food.pos:
+            if self.pos==self.food.pos:
                 self.eat()
 
     def eat(self):
@@ -293,7 +292,7 @@ class Snake(object):
             self.game.dead = True
 
     def is_new_dir(self, k):
-        return sum([self.dir[i] * k[i] for i in range(2)]) == 0
+        return sum([self.dir[i] * k[i] for i in range(2)])==0
 
 
 class bodyCreator(object):
@@ -308,7 +307,7 @@ class bodyCreator(object):
         body_sh = sg.SceneGraphNode('body_sh')
         body_sh.transform = tr.matmul([
             tr.rotationZ(np.pi / 2),
-            tr.rotationX(np.pi/2),
+            tr.rotationX(np.pi / 2),
             tr.uniformScale(0.01),
             tr.translate(0, 0, 0)])
         body_sh.childs += [gpu_body_quad]
@@ -368,8 +367,8 @@ class Food(object):
 
         food = sg.SceneGraphNode('food')
         food.transform = tr.matmul([
-            tr.uniformScale(0.8*game.grid),
-            tr.rotationX(np.pi/2),
+            tr.uniformScale(0.8 * game.grid),
+            tr.rotationX(np.pi / 2),
             tr.uniformScale(0.00015),
             tr.translate(15700, -5900, -900)])
         food.childs += [gpu_food_obj]
@@ -454,7 +453,7 @@ class Food(object):
 
     def update(self, snake):
         choice = self.game.empty - set(snake.tail) - {snake.pos}
-        if choice != set():
+        if choice!=set():
             self.pos = rd.choice(list(choice))
             self.view_pos = get_pos(self.g_grid, self.g_size, self.pos)
             self.game.view_food = self.view_pos
@@ -483,8 +482,8 @@ class Background(object):
 
         _lamp = sg.SceneGraphNode('_lamp')
         _lamp.transform = tr.matmul([
-            tr.rotationZ(np.pi/4),
-            tr.rotationX(3.14/2),
+            tr.rotationZ(np.pi / 4),
+            tr.rotationX(3.14 / 2),
             tr.uniformScale(0.00045),
             tr.translate(0, -560, 0)])
         _lamp.childs += [gpu_lamp_obj]
@@ -594,22 +593,22 @@ class Background(object):
 
             lamps = {1: (1, 1), 2: (-1, 1), 3: (1, -1), 4: (-1, -1)}
             for j in range(1, 5):
-                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"La{3+j}"), 1.0, 1.0, 1.0)
-                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ld{3+j}"), 1, 1, 1)
-                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ls{3+j}"), 1.0, 1.0, 1.0)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"La{3 + j}"), 1.0, 1.0, 1.0)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ld{3 + j}"), 1, 1, 1)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ls{3 + j}"), 1.0, 1.0, 1.0)
 
-                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ka{3+j}"), -0.04, -0.04, -0.04)
-                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Kd{3+j}"), 0.95, 1.0, 1.0)
-                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ks{3+j}"), 0.5, 0.5, 0.5)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ka{3 + j}"), -0.04, -0.04, -0.04)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Kd{3 + j}"), 0.95, 1.0, 1.0)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ks{3 + j}"), 0.5, 0.5, 0.5)
 
-                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"lightPosition{3+j}"),
-                            0.9*lamps[j][0], 0.9*lamps[j][1], 0.34)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"lightPosition{3 + j}"),
+                            0.9 * lamps[j][0], 0.9 * lamps[j][1], 0.34)
 
-                glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, f"shininess{3+j}"), 100)
+                glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, f"shininess{3 + j}"), 100)
 
-                glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"constantAttenuation{3+j}"), 0.63)
-                glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"linearAttenuation{3+j}"), 0.59)
-                glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"quadraticAttenuation{3+j}"), 4)
+                glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"constantAttenuation{3 + j}"), 0.63)
+                glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"linearAttenuation{3 + j}"), 0.59)
+                glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"quadraticAttenuation{3 + j}"), 4)
 
             glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
             glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
@@ -673,7 +672,8 @@ class interactiveWindow(object):
                 tz=0),
             tr.rotationZ(theta)
         ])
-        sg.drawSceneGraphNode(model, pipeline, 'transform')
+        glUseProgram(pipeline.shaderProgram)
+        sg.drawSceneGraphNode(model, pipeline, transformName='transform')
 
 
 class Axis(object):

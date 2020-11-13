@@ -5,6 +5,7 @@ import glfw
 import sys
 from libs.models import *
 from libs.controller import Controller
+from time import sleep
 
 N = 20  # int(sys.argv[1])
 
@@ -44,9 +45,16 @@ if __name__=='__main__':
     pipeline_ls_col4 = ls.SimplePhongShaderProgramMulti(4)
     pipeline_ls_col7 = ls.SimplePhongShaderProgramMulti(7)
 
+    pipeline_tx_2d = es.SimpleTextureTransformShaderProgram()
+
     glClearColor(48 / 255, 48 / 255, 48 / 255, 1.0)
 
     glEnable(GL_DEPTH_TEST)
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     food = Food(game)
     snake = Snake(game, food)
@@ -68,47 +76,46 @@ if __name__=='__main__':
         glfw.poll_events()
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        # if game.pause or game.dead or game.win or game.speed:
-        #     glUseProgram(pipeline_tx.shaderProgram)
-        #     if game.pause:
-        #         iW.draw(pipeline_tx, game.time_pause, 'pause')
-        #         if game.time_pause < 2*np.pi:
-        #             game.time_pause += 0.01
-        #         else:
-        #             game.time_pause = 2*np.pi
-        #
-        #     elif game.win:
-        #         iW.draw(pipeline_tx, game.time_pause, 'win')
-        #         if game.time_pause < 2*np.pi:
-        #             if game.time_pause == 0:
-        #                 sleep(0.1)
-        #             game.time_pause += 0.005
-        #         else:
-        #             game.time_pause = 2*np.pi
-        #
-        #     elif game.dead:
-        #         iW.draw(pipeline_tx, game.time_pause, 'dead')
-        #         if game.time_pause < 2*np.pi:
-        #             game.time_pause += 0.01
-        #         else:
-        #             game.time_pause = 2*np.pi
-        #     elif game.speed:
-        #         iW.draw(pipeline_tx, game.time_pause, 'speed')
-        #         if game.time_pause < 2*np.pi:
-        #             game.time_pause += 0.01
-        #         else:
-        #             game.time_pause = 2*np.pi
-        # else:d
 
-        projection, view = cam.get_cam()
+        if game.pause or game.dead or game.win or game.speed:
+            if game.pause:
+                iW.draw(pipeline_tx_2d, game.time_pause, 'pause')
+                if game.time_pause < 2*np.pi:
+                    game.time_pause += 0.01
+                else:
+                    game.time_pause = 2*np.pi
 
-        axis.draw(pipeline_col, projection, view)
+            elif game.win:
+                iW.draw(pipeline_tx_2d, game.time_pause, 'win')
+                if game.time_pause < 2*np.pi:
+                    if game.time_pause == 0:
+                        sleep(0.1)
+                    game.time_pause += 0.005
+                else:
+                    game.time_pause = 2*np.pi
 
-        bg.draw(pipeline_ls_tx7, pipeline_ls_col7, projection, view)
+            elif game.dead:
+                iW.draw(pipeline_tx_2d, game.time_pause, 'dead')
+                if game.time_pause < 2*np.pi:
+                    game.time_pause += 0.01
+                else:
+                    game.time_pause = 2*np.pi
+            elif game.speed:
+                iW.draw(pipeline_tx_2d, game.time_pause, 'speed')
+                if game.time_pause < 2*np.pi:
+                    game.time_pause += 0.01
+                else:
+                    game.time_pause = 2*np.pi
+        else:
+            projection, view = cam.get_cam()
 
-        food.draw(pipeline_ls_col3, projection, view, ti)
+            axis.draw(pipeline_col, projection, view)
 
-        snake.draw(pipeline_ls_col7, projection, view)
+            bg.draw(pipeline_ls_tx7, pipeline_ls_col7, projection, view)
+
+            food.draw(pipeline_ls_col3, projection, view, ti)
+
+            snake.draw(pipeline_ls_col7, projection, view)
 
         if game.check_time():
             snake.update()

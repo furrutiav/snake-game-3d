@@ -4,6 +4,11 @@ Daniel Calderon, CC3501, 2019-2
 Lighting Shaders
 
 v2 - Bug fixed: Textures were not binded
+
+F. Urrutia V.
+update Lighting Shaders
+
+v2.2: More light with PhongShader; color and texture
 """
 
 from OpenGL.GL import *
@@ -658,14 +663,7 @@ class SimpleTexturePhongShaderProgram:
         glDrawElements(mode, shape.size, GL_UNSIGNED_INT, None)
 
 
-"""
-F. Urrutia V.
-update Lighting Shaders
-
-v2.2: More light with PhongShader; color and texture
-"""
-
-
+# SOLUTION
 class SimpleTexturePhongShaderProgram2:
 
     def __init__(self):
@@ -696,16 +694,16 @@ class SimpleTexturePhongShaderProgram2:
 
         fragment_shader = """
             #version 330 core
-            
+    
             in vec3 fragNormal;
             in vec3 fragPosition;
             in vec2 fragTexCoords;
-
+            
             out vec4 fragColor;
-            
-            uniform vec3 viewPosition; 
-            
-            uniform vec3 lightPosition1;            
+    
+            uniform vec3 viewPosition;
+        
+            uniform vec3 lightPosition1;
             uniform vec3 La1;
             uniform vec3 Ld1;
             uniform vec3 Ls1;
@@ -717,7 +715,7 @@ class SimpleTexturePhongShaderProgram2:
             uniform float linearAttenuation1;
             uniform float quadraticAttenuation1;
             
-            uniform vec3 lightPosition2;            
+            uniform vec3 lightPosition2;
             uniform vec3 La2;
             uniform vec3 Ld2;
             uniform vec3 Ls2;
@@ -730,40 +728,42 @@ class SimpleTexturePhongShaderProgram2:
             uniform float quadraticAttenuation2;
             
             uniform sampler2D samplerTex;
-
+        
             void main()
             {
                 // ambient
+            
                 vec3 ambient1 = Ka1 * La1;
+            
                 vec3 ambient2 = Ka2 * La2;
-                vec3 ambient = (ambient1 + ambient2) * 1;
-
+            
                 // diffuse
                 // fragment normal has been interpolated, so it does not necessarily have norm equal to 1
                 vec3 normalizedNormal = normalize(fragNormal);
+            
                 vec3 toLight1 = lightPosition1 - fragPosition;
                 vec3 lightDir1 = normalize(toLight1);
                 float diff1 = max(dot(normalizedNormal, lightDir1), 0.0);
                 vec3 diffuse1 = Kd1 * Ld1 * diff1;
-
+            
                 vec3 toLight2 = lightPosition2 - fragPosition;
                 vec3 lightDir2 = normalize(toLight2);
                 float diff2 = max(dot(normalizedNormal, lightDir2), 0.0);
                 vec3 diffuse2 = Kd2 * Ld2 * diff2;
-                vec3 diffuse = (diffuse1 + diffuse2) * 1;
-
+            
                 // specular
                 vec3 viewDir = normalize(viewPosition - fragPosition);
+            
                 vec3 reflectDir1 = reflect(-lightDir1, normalizedNormal);  
                 float spec1 = pow(max(dot(viewDir, reflectDir1), 0.0), shininess1);
                 vec3 specular1 = Ks1 * Ls1 * spec1;
-                
+            
                 vec3 reflectDir2 = reflect(-lightDir2, normalizedNormal);  
                 float spec2 = pow(max(dot(viewDir, reflectDir2), 0.0), shininess2);
                 vec3 specular2 = Ks2 * Ls2 * spec2;
-                vec3 specular = (specular1 + specular2) * 1;
-
+            
                 // attenuation
+            
                 float distToLight1 = length(toLight1);
                 float attenuation1 = constantAttenuation1
                     + linearAttenuation1 * distToLight1
@@ -773,11 +773,11 @@ class SimpleTexturePhongShaderProgram2:
                 float attenuation2 = constantAttenuation2
                     + linearAttenuation2 * distToLight2
                     + quadraticAttenuation2 * distToLight2 * distToLight2;
-                float attenuation = (attenuation1 + attenuation2) * 1;
-
+                            
                 vec4 fragOriginalColor = texture(samplerTex, fragTexCoords);
-
-                vec3 result = (ambient + ((diffuse + specular) / attenuation)) * fragOriginalColor.rgb;
+                // ambient + ((diffuse + specular) / attenuation)
+                vec3 result = ( (ambient1 + ((diffuse1 + specular1) / attenuation1)) + (ambient2 + ((diffuse2 + specular
+                2) / attenuation2))  ) * fragOriginalColor.rgb;
                 fragColor = vec4(result, 1.0);
             }
             """
@@ -842,16 +842,16 @@ class SimplePhongShaderProgram2:
 
         fragment_shader = """
             #version 330 core
-
+            
             out vec4 fragColor;
-
+            
             in vec3 fragNormal;
             in vec3 fragPosition;
             in vec3 fragOriginalColor;
             
             uniform vec3 viewPosition;
-            
-            uniform vec3 lightPosition1;            
+        
+            uniform vec3 lightPosition1;
             uniform vec3 La1;
             uniform vec3 Ld1;
             uniform vec3 Ls1;
@@ -863,7 +863,7 @@ class SimplePhongShaderProgram2:
             uniform float linearAttenuation1;
             uniform float quadraticAttenuation1;
             
-            uniform vec3 lightPosition2;            
+            uniform vec3 lightPosition2;
             uniform vec3 La2;
             uniform vec3 Ld2;
             uniform vec3 Ls2;
@@ -875,40 +875,41 @@ class SimplePhongShaderProgram2:
             uniform float linearAttenuation2;
             uniform float quadraticAttenuation2;
             
-
             void main()
             {
                 // ambient
+            
                 vec3 ambient1 = Ka1 * La1;
+            
                 vec3 ambient2 = Ka2 * La2;
-                vec3 ambient = (ambient1 + ambient2) * 1;
-
+            
                 // diffuse
                 // fragment normal has been interpolated, so it does not necessarily have norm equal to 1
                 vec3 normalizedNormal = normalize(fragNormal);
+            
                 vec3 toLight1 = lightPosition1 - fragPosition;
                 vec3 lightDir1 = normalize(toLight1);
                 float diff1 = max(dot(normalizedNormal, lightDir1), 0.0);
                 vec3 diffuse1 = Kd1 * Ld1 * diff1;
-
+            
                 vec3 toLight2 = lightPosition2 - fragPosition;
                 vec3 lightDir2 = normalize(toLight2);
                 float diff2 = max(dot(normalizedNormal, lightDir2), 0.0);
                 vec3 diffuse2 = Kd2 * Ld2 * diff2;
-                vec3 diffuse = (diffuse1 + diffuse2) * 1;
-
+            
                 // specular
                 vec3 viewDir = normalize(viewPosition - fragPosition);
+            
                 vec3 reflectDir1 = reflect(-lightDir1, normalizedNormal);  
                 float spec1 = pow(max(dot(viewDir, reflectDir1), 0.0), shininess1);
                 vec3 specular1 = Ks1 * Ls1 * spec1;
-                
+            
                 vec3 reflectDir2 = reflect(-lightDir2, normalizedNormal);  
                 float spec2 = pow(max(dot(viewDir, reflectDir2), 0.0), shininess2);
                 vec3 specular2 = Ks2 * Ls2 * spec2;
-                vec3 specular = (specular1 + specular2) * 1;
-
+            
                 // attenuation
+            
                 float distToLight1 = length(toLight1);
                 float attenuation1 = constantAttenuation1
                     + linearAttenuation1 * distToLight1
@@ -918,9 +919,9 @@ class SimplePhongShaderProgram2:
                 float attenuation2 = constantAttenuation2
                     + linearAttenuation2 * distToLight2
                     + quadraticAttenuation2 * distToLight2 * distToLight2;
-                float attenuation = (attenuation1 + attenuation2) * 1;
                 
-                vec3 result = (ambient + ((diffuse + specular) / attenuation)) * fragOriginalColor;
+                vec3 result = ( (ambient1 + ((diffuse1 + specular1) / attenuation1)) + (ambient2 + ((diffuse2 + specular
+                2) / attenuation2))  ) * fragOriginalColor;
                 fragColor = vec4(result, 1.0);
             }
             """
@@ -1149,6 +1150,7 @@ def _multi_fragment_shader_code(size):
             fragColor = vec4(result, 1.0);
         }
         """
+    # print(code)
     return code
 
 
@@ -1232,5 +1234,6 @@ def tx_multi_fragment_shader_code(size):
             fragColor = vec4(result, 1.0);
         }
         """
-    # (code)
+    # print(code)
     return code
+
