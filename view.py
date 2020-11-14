@@ -36,6 +36,7 @@ if __name__ == '__main__':
     game = Game(N)
 
     glfw.set_key_callback(window, controller.on_key)
+    glfw.set_scroll_callback(window, controller.on_scroll)
 
     pipelines_ls_col = [ls.SimplePhongShaderProgramMulti(i) for i in range(3, 8)]
     pipelines_ls_tx = [ls.SimpleTexturePhongShaderProgramMulti(i) for i in range(3, 8)]

@@ -37,14 +37,14 @@ class Game(object):
         self.cam_angle = 0
         self.view_cam = None
         # set
-        self.numb = 0
+        self.numb = 0.001
         self.cursor = 0, 0
         # shaders
         self.view_pos = None
         self.view_food = None
 
     def post_time(self, t0):
-        self.dt = [0.005, (self.dt + t0 - self.t + 0.011) / 3, (self.dt + t0 - self.t) / 2, t0 - self.t][0]
+        self.dt = [0.005, (self.dt + t0 - self.t + 0.011) / 3, (self.dt + t0 - self.t) / 2, t0 - self.t, self.numb][4]
         self.t = t0
 
     def check_time(self):

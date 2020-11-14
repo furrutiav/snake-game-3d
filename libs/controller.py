@@ -107,3 +107,7 @@ class Controller(object):
 
             elif key == glfw.KEY_ESCAPE:
                 self.game.pause = True
+
+    def on_scroll(self, window, pos, action):
+        self.game.numb += action*0.001
+        print(self.game.numb)
