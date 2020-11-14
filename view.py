@@ -8,7 +8,7 @@ from libs.controller import Controller
 from time import time
 
 N = 20
-fullScreen = 0  # int(sys.argv[1]) == 1
+fullScreen = 1  # int(sys.argv[1]) == 1
 
 if __name__ == '__main__':
     if not glfw.init():
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     snake = Snake(game, food)
     iW = interactiveWindow(game)
     cam = Cam(game)
-    bg = Background(game, cam, 'libs/fig/bricks.png')
+    bg = Background(game, cam, 'libs/fig/bricks.png', 'libs/fig/leaves.png')
 
     controller.set_snake(snake)
     controller.set_game(game)

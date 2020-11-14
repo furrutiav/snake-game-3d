@@ -58,7 +58,6 @@ def readFaceVertex(faceDescription):
     return faceVertex
 
 
-
 def readOBJ(filename, color):
 
     vertices = []
@@ -150,7 +149,7 @@ if __name__ == "__main__":
 
     # Creating shapes on GPU memory
     gpuAxis = es.toGPUShape(bs.createAxis(7))
-    gpuSuzanne = es.toGPUShape(shape = readOBJ('walls.obj', (0.9, 0.6, 0.2)))
+    gpuSuzanne = es.toGPUShape(shape=readOBJ('../../libs/obj/ancient_wall.obj', (0.9, 0.6, 0.2)))
 
     t0 = glfw.get_time()
     camera_theta = -3*np.pi/4

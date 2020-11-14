@@ -42,6 +42,9 @@ class Game(object):
         # shaders
         self.view_pos = None
         self.view_food = None
+        # arc
+        self.arc_pos = [(5, 10), (8, 10), (11, 10), (14, 10)]
+        self.empty -= set(self.arc_pos)
 
     def post_time(self, t0):
         self.dt = [0.005, (self.dt + t0 - self.t + 0.011) / 3, (self.dt + t0 - self.t) / 2, t0 - self.t, self.numb][4]
@@ -266,6 +269,7 @@ class Snake(object):
         if not (self.game.win or self.game.pause):
             if not self.pos[0] in set(range(0, self.g_size)) or \
                     not self.pos[1] in set(range(0, self.g_size)) \
+                    or (self.pos in self.game.arc_pos)\
                     or (self.pos in self.tail):
                 self.dead()
             if self.pos == self.food.pos:
@@ -468,7 +472,7 @@ class Food(object):
 
 
 class Background(object):
-    def __init__(self, game, cam, image):
+    def __init__(self, game, cam, image, leaves):
         self.game = game
         self.cam = cam
 
@@ -477,22 +481,33 @@ class Background(object):
             GL_LINEAR)
 
         gpu_lamp_obj = es.toGPUShape(
-            bs.readOBJ('libs/obj/streetLamp.obj', (0.1, 0.1, 0.1)))
+            bs.readOBJ('libs/obj/streetLamp.obj', (0.2, 0.2, 0.2)))
 
         gpu_light_cube = es.toGPUShape(
             bs.createColorNormalsCube(1, 1, 1))
 
         gpu_wall_cube_h = es.toGPUShape(
-            bs.createTextureNormalsQuad('libs/fig/bricks.png', game.size+1, 1), GL_REPEAT,
+            bs.createTextureNormalsQuad(leaves, game.size+1, 1), GL_REPEAT,
             GL_LINEAR)
 
         gpu_wall_cube_v = es.toGPUShape(
-            bs.createTextureNormalsQuad('libs/fig/bricks.png', game.size, 1), GL_REPEAT,
+            bs.createTextureNormalsQuad(leaves, game.size, 1), GL_REPEAT,
             GL_LINEAR)
+
+        gpu_arc_obj = es.toGPUShape(
+            bs.readOBJ('libs/obj/ancient_wall.obj', (1, 1, 0.72), status=False))
 
         BG = sg.SceneGraphNode('BG')
         BG.transform = tr.uniformScale(2)  # tr.scale(2, 2, 0.001)  #
         BG.childs += [gpu_BG_quad]
+
+        arc = sg.SceneGraphNode('arc')
+        arc.transform = tr.matmul([
+            tr.translate(-0.039, -0.049, -0.01),
+            tr.rotationX(np.pi / 2),
+            tr.scale(1-0.22, 1, 1-0.38),
+            tr.uniformScale(0.0011)])
+        arc.childs += [gpu_arc_obj]
 
         _lamp = sg.SceneGraphNode('_lamp')
         _lamp.transform = tr.matmul([
@@ -537,7 +552,7 @@ class Background(object):
         lamp4.childs += [lamp]
 
         lamps = sg.SceneGraphNode('lamps')
-        lamps.childs += [lamp1, lamp2, lamp3, lamp4]
+        lamps.childs += [lamp1, lamp2, lamp3, lamp4, arc]
 
         wall_v = sg.SceneGraphNode('wall_v')
         wall_v.transform = tr.matmul([
@@ -601,8 +616,15 @@ class Background(object):
 
         self.model_tx = BG_tr
         self.model_col = lamps
+        self.model_arc = arc
 
     def draw(self, pipeline_tx, pipeline_col, projection, view, size):
+        self.model_arc.transform = tr.matmul([
+            tr.translate(-0.039, -0.049, -0.01),
+            tr.rotationX(np.pi / 2),
+            tr.scale(1-0.22, 1, 1-0.38),
+            tr.uniformScale(0.0011)])
+
         dict = {'tx': (pipeline_tx, self.model_tx), 'col': (pipeline_col, self.model_col)}
         for p in ['tx', 'col']:
             pipeline = dict[p][0]
