@@ -8,7 +8,7 @@ from libs.controller import Controller
 from time import time
 
 N = 20
-fullScreen = 0  # int(sys.argv[1]) == 1
+fullScreen = 0 if len(sys.argv) == 1 else 1 if int(sys.argv[1]) == 1 else 0
 
 if __name__ == '__main__':
     if not glfw.init():

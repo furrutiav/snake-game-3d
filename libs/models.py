@@ -47,7 +47,7 @@ class Game(object):
         self.empty -= set(self.arc_pos)
 
     def post_time(self, t0):
-        self.dt = [0.005, (self.dt + t0 - self.t + 0.011) / 3, (self.dt + t0 - self.t) / 2, t0 - self.t, self.numb][4]
+        self.dt = [0.005, (self.dt + t0 - self.t + 0.011) / 3, (self.dt + t0 - self.t) / 2, t0 - self.t, self.numb + 0.0001][4]
         self.t = t0
 
     def check_time(self):
@@ -703,7 +703,7 @@ class Background(object):
             viewPos = self.game.view_cam
             snakePos = self.game.view_pos
             foodPos = self.game.view_food
-            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition1"), 0, 0, 1.5)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition1"), 0, 0, 2)
             glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition2"), snakePos[0], snakePos[1], 0.09)
             glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition3"), foodPos[0], foodPos[1], 0.04)
             glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "viewPosition"), viewPos[0], viewPos[1],
