@@ -17,7 +17,7 @@ if __name__ == '__main__':
     wSize = 0.6
     if fullScreen:
         wFun = glfw.get_primary_monitor()
-        wsize = 1
+        wSize = 1
 
     width = int(1920 * wSize)
     height = int(1080 * wSize)
