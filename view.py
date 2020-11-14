@@ -5,9 +5,10 @@ import glfw
 import sys
 from libs.models import *
 from libs.controller import Controller
+from time import time
 
 N = 20
-fullScreen = int(sys.argv[1]) == 1
+fullScreen = 0  # int(sys.argv[1]) == 1
 
 if __name__ == '__main__':
     if not glfw.init():
@@ -59,8 +60,6 @@ if __name__ == '__main__':
     controller.set_snake(snake)
     controller.set_game(game)
     controller.set_cam(cam)
-
-    axis = Axis(100)
 
     while not glfw.window_should_close(window):
 

@@ -44,7 +44,7 @@ class Game(object):
         self.view_food = None
 
     def post_time(self, t0):
-        self.dt = [0.005, (self.dt + t0 - self.t + 0.005) / 3, (self.dt + t0 - self.t) / 2][0]
+        self.dt = [0.005, (self.dt + t0 - self.t + 0.011) / 3, (self.dt + t0 - self.t) / 2, t0 - self.t][0]
         self.t = t0
 
     def check_time(self):
@@ -725,18 +725,14 @@ class interactiveWindow(object):
         self.models = {'dead': deadW_tr, 'pause': pauseW_tr, 'win': winW_tr}
 
     def draw(self, pipeline, mod):
-        if self.game.time_pause < 2 * np.pi:
-            self.game.time_pause += 0.01
+        scale = self.game.time_pause
+        if scale < 2:
+            self.game.time_pause += 0.005
         else:
-            self.game.time_pause = 2 * np.pi
-        theta = self.game.time_pause
+            self.game.time_pause = 2
         model = self.models[mod]
         model.transform = tr.matmul([
-            tr.uniformScale(theta / np.pi),
-            tr.translate(
-                tx=0,
-                ty=0,
-                tz=0)
+            tr.uniformScale(scale),
         ])
         glUseProgram(pipeline.shaderProgram)
         sg.drawSceneGraphNode(model, pipeline, transformName='transform')
