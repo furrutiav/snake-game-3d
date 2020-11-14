@@ -689,7 +689,8 @@ class Background(object):
 
 
 class interactiveWindow(object):
-    def __init__(self):
+    def __init__(self, game):
+        self.game = game
         gpu_deadW_quad = es.toGPUShape(bs.createTextureQuad("libs/fig/dead.png"), GL_REPEAT,
                                        GL_NEAREST)
         gpu_pauseW_quad = es.toGPUShape(bs.createTextureQuad("libs/fig/pause.png"), GL_REPEAT,
@@ -723,7 +724,12 @@ class interactiveWindow(object):
 
         self.models = {'dead': deadW_tr, 'pause': pauseW_tr, 'win': winW_tr}
 
-    def draw(self, pipeline, theta, mod):
+    def draw(self, pipeline, mod):
+        if self.game.time_pause < 2 * np.pi:
+            self.game.time_pause += 0.01
+        else:
+            self.game.time_pause = 2 * np.pi
+        theta = self.game.time_pause
         model = self.models[mod]
         model.transform = tr.matmul([
             tr.uniformScale(theta / np.pi),

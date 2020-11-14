@@ -5,18 +5,24 @@ import glfw
 import sys
 from libs.models import *
 from libs.controller import Controller
-from time import sleep
 
-N = 20  # int(sys.argv[1])
+N = 20
+fullScreen = int(sys.argv[1]) == 1
 
 if __name__ == '__main__':
     if not glfw.init():
         sys.exit()
 
-    width = int(1920 * 0.8)
-    height = int(1080 * 0.8)
+    wFun = None
+    wSize = 0.6
+    if fullScreen:
+        wFun = glfw.get_primary_monitor()
+        wsize = 1
+
+    width = int(1920 * wSize)
+    height = int(1080 * wSize)
     window = glfw.create_window(
-        width, height, 'Snake Game 3D; Autor: F. Urrutia V.', None, None)   # glfw.get_primary_monitor()
+        width, height, 'Snake Game 3D; Autor: F. Urrutia V.', wFun, None)
 
     if not window:
         glfw.terminate()
@@ -29,7 +35,6 @@ if __name__ == '__main__':
     game = Game(N)
 
     glfw.set_key_callback(window, controller.on_key)
-    glfw.set_scroll_callback(window, controller.on_scroll)
 
     pipelines_ls_col = [ls.SimplePhongShaderProgramMulti(i) for i in range(3, 8)]
     pipelines_ls_tx = [ls.SimpleTexturePhongShaderProgramMulti(i) for i in range(3, 8)]
@@ -47,7 +52,7 @@ if __name__ == '__main__':
 
     food = Food(game)
     snake = Snake(game, food)
-    iW = interactiveWindow()
+    iW = interactiveWindow(game)
     cam = Cam(game)
     bg = Background(game, cam, 'libs/fig/bricks.png')
 
@@ -68,27 +73,11 @@ if __name__ == '__main__':
 
         if game.pause or game.dead or game.win or game.speed:
             if game.pause:
-                iW.draw(pipeline_tx_2d, game.time_pause, 'pause')
-                if game.time_pause < 2*np.pi:
-                    game.time_pause += 0.01
-                else:
-                    game.time_pause = 2*np.pi
-
+                iW.draw(pipeline_tx_2d, 'pause')
             elif game.win:
-                iW.draw(pipeline_tx_2d, game.time_pause, 'win')
-                if game.time_pause < 2*np.pi:
-                    if game.time_pause == 0:
-                        sleep(0.1)
-                    game.time_pause += 0.005
-                else:
-                    game.time_pause = 2*np.pi
-
+                iW.draw(pipeline_tx_2d, 'win')
             elif game.dead:
-                iW.draw(pipeline_tx_2d, game.time_pause, 'dead')
-                if game.time_pause < 2*np.pi:
-                    game.time_pause += 0.01
-                else:
-                    game.time_pause = 2*np.pi
+                iW.draw(pipeline_tx_2d, 'dead')
         else:
             projection, view = cam.get_cam()
 
@@ -97,9 +86,7 @@ if __name__ == '__main__':
                 top = 4
 
             bg.draw(pipelines_ls_tx[top], pipelines_ls_col[top], projection, view, top)
-
             food.draw(pipelines_ls_col[0], projection, view, ti)
-
             snake.draw(pipelines_ls_col[top], projection, view, top)
 
         if game.check_time():
