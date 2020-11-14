@@ -83,7 +83,7 @@ if __name__ == "__main__":
     gpuRainbowCube = es.toGPUShape(bs.createRainbowCube())
     gpuAxis = es.toGPUShape(bs.createAxis(2))
     gpuBoo = es.toGPUShape(bs.createTextureQuad("boo.png"), GL_REPEAT, GL_NEAREST)
-    gpuQuestionBox = es.toGPUShape(bs.createTextureQuad("question_box.png",10,1), GL_REPEAT, GL_NEAREST)
+    gpuQuestionBox = es.toGPUShape(bs.createTextureQuad("question_box.png", 10, 1), GL_REPEAT, GL_NEAREST)
 
     questionBoxTransform = np.matmul(tr.translate(0, -0.8, 0), tr.scale(2, 0.2, 1))
 
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         # Clearing the screen in both, color and depth
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        projection = tr.perspective(30, float(width)/float(height),0.1, 100)
+        projection = tr.perspective(30, float(width)/float(height), 0.1, 100)
 
         view = tr.lookAt(
             np.array([5,5,2]),

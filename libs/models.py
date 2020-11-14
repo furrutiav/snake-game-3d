@@ -2,7 +2,8 @@
 -----------> MODELS <-----------
 """
 
-from libs import basic_shapes as bs, transformations as tr, easy_shaders as es, scene_graph as sg, lighting_shaders as ls
+from libs import basic_shapes as bs, transformations as tr, easy_shaders as es, scene_graph as sg, \
+    lighting_shaders as ls
 import numpy as np
 from OpenGL.GL import *
 import random as rd
@@ -47,7 +48,8 @@ class Game(object):
         self.empty -= set(self.arc_pos)
 
     def post_time(self, t0):
-        self.dt = [0.005, (self.dt + t0 - self.t + 0.011) / 3, (self.dt + t0 - self.t) / 2, t0 - self.t, self.numb + 0.0001][4]
+        self.dt = \
+        [0.005, (self.dt + t0 - self.t + 0.011) / 3, (self.dt + t0 - self.t) / 2, t0 - self.t, self.numb + 0.005][4]
         self.t = t0
 
     def check_time(self):
@@ -223,7 +225,7 @@ class Snake(object):
             glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation3"), 0)
 
             lamps = {1: (1, 1), 2: (-1, 1), 3: (1, -1), 4: (-1, -1)}
-            for j in range(1, size+1):
+            for j in range(1, size + 1):
                 glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"La{3 + j}"), 1.0, 1.0, 1.0)
                 glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ld{3 + j}"), 1, 1, 1)
                 glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ls{3 + j}"), 1.0, 1.0, 1.0)
@@ -244,16 +246,16 @@ class Snake(object):
             glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
             glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
 
-            if k == 'H':
+            if k=='H':
                 sg.drawSceneGraphNode(model, pipeline)
             else:
                 length = len(self.tail)
                 for t in range(length):
                     piece = model.childs[t]
-                    if t == length - 1:
+                    if t==length - 1:
                         view_pos_0 = get_pos(self.g_grid, self.g_size, None, self.pos,
                                              get_pos(self.g_grid, self.g_size, self.tail[t]), i=self.game.count,
-                                             m=self.game.time/self.game.dt)
+                                             m=self.game.time / self.game.dt)
                         theta_0 = get_theta(self.tail_angle[t], self.theta, i=self.game.count,
                                             m=self.game.time / self.game.dt)
                         piece.transform = tr.matmul([
@@ -306,18 +308,18 @@ class Snake(object):
 
     def collide(self):
         if not (self.game.win or self.game.pause):
-            if (not self.pos[0] in set(range(0, self.g_size))) or\
-                    (not self.pos[1] in set(range(0, self.g_size)))\
-                    or (self.pos in self.game.arc_pos)\
+            if (not self.pos[0] in set(range(0, self.g_size))) or \
+                    (not self.pos[1] in set(range(0, self.g_size))) \
+                    or (self.pos in self.game.arc_pos) \
                     or (self.pos in self.tail):
                 self.dead()
-            if self.pos == self.food.pos:
+            if self.pos==self.food.pos:
                 self.eat()
 
     def eat(self):
-        add_pos = self.food.pos if self.tail == [] else self.tail[0]
+        add_pos = self.food.pos if self.tail==[] else self.tail[0]
         self.tail = [add_pos] + self.tail
-        add_angle = self.theta if self.tail_angle == [] else self.tail_angle[0]    #?
+        add_angle = self.theta if self.tail_angle==[] else self.tail_angle[0]  # ?
         self.tail_angle = [add_angle] + self.tail_angle
         self.food.update(self)
         self.game.count_food += 1
@@ -340,7 +342,7 @@ class Snake(object):
             self.game.dead = True
 
     def is_new_dir(self, k):
-        return sum([self.dir[i] * k[i] for i in range(2)]) == 0
+        return sum([self.dir[i] * k[i] for i in range(2)])==0
 
 
 class bodyCreator(object):
@@ -364,9 +366,9 @@ class bodyCreator(object):
         body_sh_tr = sg.SceneGraphNode(f'body_sh_tr_{game.count_food}')
         body_sh_tr.transform = tr.matmul([
             tr.translate(
-            tx=view_pos[0],
-            ty=view_pos[1],
-            tz=0),
+                tx=view_pos[0],
+                ty=view_pos[1],
+                tz=0),
             tr.rotationZ(angle)])
         body_sh_tr.childs += [body_sh]
         body.childs = [body_sh_tr] + body.childs
@@ -379,9 +381,9 @@ class bodyCreator(object):
         view_pos = get_pos(self.g_grid, self.g_size, pos)
         self.model.transform = tr.matmul([
             tr.translate(
-            tx=view_pos[0],
-            ty=view_pos[1],
-            tz=0),
+                tx=view_pos[0],
+                ty=view_pos[1],
+                tz=0),
             tr.rotationZ(angle)])
 
 
@@ -441,7 +443,7 @@ class Food(object):
                 tx=self.view_pos[0],
                 ty=self.view_pos[1],
                 tz=self.game.grid / 2),
-            tr.rotationZ(1.5*theta)
+            tr.rotationZ(1.5 * theta)
         ])
         ctr = self.game.numb
         glUseProgram(pipeline.shaderProgram)
@@ -505,7 +507,7 @@ class Food(object):
 
     def update(self, snake):
         choice = self.game.empty - set(snake.tail) - {snake.pos}
-        if choice != set():
+        if choice!=set():
             self.pos = rd.choice(list(choice))
             self.view_pos = get_pos(self.g_grid, self.g_size, self.pos)
             self.game.view_food = self.view_pos
@@ -529,7 +531,7 @@ class Background(object):
             bs.createColorNormalsCube(1, 1, 1))
 
         gpu_wall_cube_h = es.toGPUShape(
-            bs.createTextureNormalsQuad(leaves, game.size+1, 1), GL_REPEAT,
+            bs.createTextureNormalsQuad(leaves, game.size + 1, 1), GL_REPEAT,
             GL_LINEAR)
 
         gpu_wall_cube_v = es.toGPUShape(
@@ -547,7 +549,7 @@ class Background(object):
         arc.transform = tr.matmul([
             tr.translate(-0.039, -0.049, -0.01),
             tr.rotationX(np.pi / 2),
-            tr.scale(1-0.22, 1, 1-0.38),
+            tr.scale(1 - 0.22, 1, 1 - 0.38),
             tr.uniformScale(0.0011)])
         arc.childs += [gpu_arc_obj]
 
@@ -598,8 +600,8 @@ class Background(object):
 
         wall_v = sg.SceneGraphNode('wall_v')
         wall_v.transform = tr.matmul([
-            tr.rotationX(np.pi/2),
-            tr.uniformScale(2*game.grid),
+            tr.rotationX(np.pi / 2),
+            tr.uniformScale(2 * game.grid),
             tr.translate(
                 tx=0,
                 ty=0.5,
@@ -610,12 +612,12 @@ class Background(object):
         wall_h = sg.SceneGraphNode('wall_h')
         wall_h.transform = tr.matmul([
             tr.rotationX(0),
-            tr.uniformScale(2*game.grid),
+            tr.uniformScale(2 * game.grid),
             tr.translate(
                 tx=0.5,
                 ty=0.5,
                 tz=1),
-            tr.scale(game.size+1, 1, 1)])
+            tr.scale(game.size + 1, 1, 1)])
         wall_h.childs += [gpu_wall_cube_h]
 
         wall = sg.SceneGraphNode('wall')
@@ -642,7 +644,7 @@ class Background(object):
             tx=-1,
             ty=0,
             tz=0),
-            tr.rotationZ(np.pi/2)])
+            tr.rotationZ(np.pi / 2)])
         wall3.childs += [wall]
 
         wall4 = sg.SceneGraphNode('wall4')
@@ -650,7 +652,7 @@ class Background(object):
             tx=1,
             ty=0,
             tz=0),
-            tr.rotationZ(-np.pi/2)])
+            tr.rotationZ(-np.pi / 2)])
         wall4.childs += [wall]
 
         BG_tr = sg.SceneGraphNode('BG_tr')
@@ -664,7 +666,7 @@ class Background(object):
         self.model_arc.transform = tr.matmul([
             tr.translate(-0.039, -0.049, -0.01),
             tr.rotationX(np.pi / 2),
-            tr.scale(1-0.22, 1, 1-0.38),
+            tr.scale(1 - 0.22, 1, 1 - 0.38),
             tr.uniformScale(0.0011)])
 
         dict = {'tx': (pipeline_tx, self.model_tx), 'col': (pipeline_col, self.model_col)}
@@ -726,7 +728,7 @@ class Background(object):
             glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation3"), 0)
 
             lamps = {1: (1, 1), 2: (-1, 1), 3: (1, -1), 4: (-1, -1)}
-            for j in range(1, size+1):
+            for j in range(1, size + 1):
                 glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"La{3 + j}"), 1.0, 1.0, 1.0)
                 glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ld{3 + j}"), 1, 1, 1)
                 glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ls{3 + j}"), 1.0, 1.0, 1.0)
@@ -739,7 +741,8 @@ class Background(object):
                             0.9 * lamps[j][0], 0.9 * lamps[j][1], 0.34)
 
                 glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, f"shininess{3 + j}"),
-                             int(90+10*(np.sin(8*lamps[j][0]*self.game.t) + np.cos(5*lamps[j][1]*self.game.t))))
+                             int(90 + 10 * (np.sin(8 * lamps[j][0] * self.game.t) + np.cos(
+                                 5 * lamps[j][1] * self.game.t))))
 
                 glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"constantAttenuation{3 + j}"), 0.63)
                 glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"linearAttenuation{3 + j}"), 0.59)
@@ -856,12 +859,14 @@ class Cam(object):
     def get_cam(self):
         if self.status == 'R':
             return self.get_cam_gta()
-
-        elif self.status == 'T':
-            return self.get_cam_pers()
-
-        elif self.status == 'E':
-            return self.get_cam_map()
+        else:
+            if self.game.dead:
+                self.status = 'R'
+                return self.get_cam_gta()
+            elif self.status == 'T':
+                return self.get_cam_pers()
+            elif self.status == 'E':
+                return self.get_cam_map()
 
 
 def get_pos(grid, size, pos, next_pos=None, current=None, i=0, m=1):
@@ -881,9 +886,9 @@ def get_pos(grid, size, pos, next_pos=None, current=None, i=0, m=1):
 
 
 def get_theta(theta_1, theta_2, i=0, m=1):
-    if theta_1 == 0 and theta_2 == 3 * np.pi / 2:
+    if theta_1==0 and theta_2==3 * np.pi / 2:
         return (i / m) * (-np.pi / 2) + (1 - i / m) * theta_1
-    elif theta_2 == 0 and theta_1 == 3 * np.pi / 2:
+    elif theta_2==0 and theta_1==3 * np.pi / 2:
         return (i / m) * (2 * np.pi) + (1 - i / m) * theta_1
     else:
         return (i / m) * theta_2 + (1 - i / m) * theta_1

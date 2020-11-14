@@ -47,10 +47,10 @@ if __name__ == '__main__':
 
     glEnable(GL_DEPTH_TEST)
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
-
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
 
     food = Food(game)
     snake = Snake(game, food)
@@ -71,6 +71,15 @@ if __name__ == '__main__':
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
+        projection, view = cam.get_cam()
+        top = game.count_food
+        if top > 3:
+            top = 4
+
+        bg.draw(pipelines_ls_tx[top], pipelines_ls_col[top], projection, view, top)
+        food.draw(pipelines_ls_col[0], projection, view, ti)
+        snake.draw(pipelines_ls_col[top], projection, view, top)
+
         if game.pause or game.dead or game.win or game.speed:
             if game.pause:
                 iW.draw(pipeline_tx_2d, 'pause')
@@ -78,16 +87,6 @@ if __name__ == '__main__':
                 iW.draw(pipeline_tx_2d, 'win')
             elif game.dead:
                 iW.draw(pipeline_tx_2d, 'dead')
-        else:
-            projection, view = cam.get_cam()
-
-            top = game.count_food
-            if top > 3:
-                top = 4
-
-            bg.draw(pipelines_ls_tx[top], pipelines_ls_col[top], projection, view, top)
-            food.draw(pipelines_ls_col[0], projection, view, ti)
-            snake.draw(pipelines_ls_col[top], projection, view, top)
 
         if game.check_time():
             snake.update()
