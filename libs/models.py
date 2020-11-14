@@ -133,7 +133,7 @@ class Snake(object):
 
         body = sg.SceneGraphNode('body')
         body.transform = tr.identity()
-        body.childs += [head_tr]
+        body.childs += []
 
         body_tr = sg.SceneGraphNode('body_tr')
         body_tr.transform = tr.identity()
@@ -163,83 +163,122 @@ class Snake(object):
             ),
             tr.rotationZ(theta)
         ])
+
         glUseProgram(pipeline.shaderProgram)
+        dict = {'H': self.head, 'B': self.body}
+        for k in ['H', 'B']:
+            model = dict[k]
 
-        # White light in all components: ambient, diffuse and specular.
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La1"), 0.8, 0.2, 0.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld1"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls1"), 1.0, 1.0, 1.0)
+            # White light in all components: ambient, diffuse and specular.
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La1"), 0.8, 0.2, 0.0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld1"), 1.0, 1.0, 1.0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls1"), 1.0, 1.0, 1.0)
 
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La2"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld2"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls2"), 1.0, 1.0, 1.0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La2"), 1.0, 1.0, 1.0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld2"), 1.0, 1.0, 1.0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls2"), 1.0, 1.0, 1.0)
 
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La3"), 1.0, 1.0, 1.0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld3"), 1, 0.01, 0.01)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls3"), 1.0, 0.3, 0.3)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "La3"), 1.0, 1.0, 1.0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ld3"), 1, 0.01, 0.01)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ls3"), 1.0, 0.3, 0.3)
 
-        # Object is barely visible at only ambient. Bright white for diffuse and specular components.
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka1"), 0.008, 0.008, 0.008)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd1"), 0.5, 0.5, 0.5)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks1"), 0, 0, 0)
+            # Object is barely visible at only ambient. Bright white for diffuse and specular components.
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka1"), 0.008, 0.008, 0.008)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd1"), 0.5, 0.5, 0.5)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks1"), 0, 0, 0)
 
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka2"), 0, 0, 0)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd2"), 0.7, 1.0, 0.7)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks2"), 0.5, 0.5, 0.5)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka2"), 0, 0, 0)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd2"), 0.7, 1.0, 0.7)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks2"), 0.5, 0.5, 0.5)
 
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka3"), -0.04, -0.04, -0.04)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd3"), 1.0, 0.7, 0.7)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks3"), 0.36, 0.36, 0.36)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ka3"), -0.04, -0.04, -0.04)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Kd3"), 1.0, 0.7, 0.7)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "Ks3"), 0.36, 0.36, 0.36)
 
-        # TO DO: Explore different parameter combinations to understand their effect!
+            # TO DO: Explore different parameter combinations to understand their effect!
 
-        viewPos = self.game.view_cam
-        snakePos = self.game.view_pos
-        foodPos = self.game.view_food
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition1"), 0, 0, 1.5)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition2"), snakePos[0], snakePos[1], 0.24)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition3"), foodPos[0], foodPos[1], 0.1)
-        glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "viewPosition"), viewPos[0], viewPos[1],
-                    viewPos[2])
+            viewPos = self.game.view_cam
+            snakePos = self.game.view_pos
+            foodPos = self.game.view_food
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition1"), 0, 0, 1.5)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition2"), snakePos[0], snakePos[1], 0.24)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "lightPosition3"), foodPos[0], foodPos[1], 0.1)
+            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, "viewPosition"), viewPos[0], viewPos[1],
+                        viewPos[2])
 
-        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess1"), -1)
-        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess2"), 100)
-        glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess3"), 100)
+            glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess1"), -1)
+            glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess2"), 100)
+            glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, "shininess3"), 100)
 
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation1"), -1.93)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation1"), 2.04)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation1"), 1.78)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation1"), -1.93)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation1"), 2.04)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation1"), 1.78)
 
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation2"), 0.78)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation2"), 3.3)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation2"), 0)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation2"), 0.78)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation2"), 3.3)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation2"), 0)
 
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation3"), 0.78)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation3"), 3.3)
-        glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation3"), 0)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "constantAttenuation3"), 0.78)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "linearAttenuation3"), 3.3)
+            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, "quadraticAttenuation3"), 0)
 
-        lamps = {1: (1, 1), 2: (-1, 1), 3: (1, -1), 4: (-1, -1)}
-        for j in range(1, size+1):
-            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"La{3 + j}"), 1.0, 1.0, 1.0)
-            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ld{3 + j}"), 1, 1, 1)
-            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ls{3 + j}"), 1.0, 1.0, 1.0)
+            lamps = {1: (1, 1), 2: (-1, 1), 3: (1, -1), 4: (-1, -1)}
+            for j in range(1, size+1):
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"La{3 + j}"), 1.0, 1.0, 1.0)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ld{3 + j}"), 1, 1, 1)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ls{3 + j}"), 1.0, 1.0, 1.0)
 
-            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ka{3 + j}"), -0.04, -0.04, -0.04)
-            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Kd{3 + j}"), 0.95, 1.0, 1.0)
-            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ks{3 + j}"), 1, 1, 1)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ka{3 + j}"), -0.04, -0.04, -0.04)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Kd{3 + j}"), 0.95, 1.0, 1.0)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"Ks{3 + j}"), 1, 1, 1)
 
-            glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"lightPosition{3 + j}"),
-                        0.9 * lamps[j][0], 0.9 * lamps[j][1], 0.14)
+                glUniform3f(glGetUniformLocation(pipeline.shaderProgram, f"lightPosition{3 + j}"),
+                            0.9 * lamps[j][0], 0.9 * lamps[j][1], 0.14)
 
-            glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, f"shininess{3 + j}"), 100)
+                glUniform1ui(glGetUniformLocation(pipeline.shaderProgram, f"shininess{3 + j}"), 100)
 
-            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"constantAttenuation{3 + j}"), 0.63)
-            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"linearAttenuation{3 + j}"), 0.59)
-            glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"quadraticAttenuation{3 + j}"), 4)
+                glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"constantAttenuation{3 + j}"), 0.63)
+                glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"linearAttenuation{3 + j}"), 0.59)
+                glUniform1f(glGetUniformLocation(pipeline.shaderProgram, f"quadraticAttenuation{3 + j}"), 4)
 
-        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
-        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
-        sg.drawSceneGraphNode(self.model, pipeline)
+            glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
+            glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
+
+            if k == 'H':
+                sg.drawSceneGraphNode(model, pipeline)
+            else:
+                length = len(self.tail)
+                for t in range(length):
+                    piece = model.childs[t]
+                    if t == length - 1:
+                        view_pos_0 = get_pos(self.g_grid, self.g_size, None, self.pos,
+                                             get_pos(self.g_grid, self.g_size, self.tail[t]), i=self.game.count,
+                                             m=self.game.time/self.game.dt)
+                        theta_0 = get_theta(self.tail_angle[t], self.theta, i=self.game.count,
+                                            m=self.game.time / self.game.dt)
+                        piece.transform = tr.matmul([
+                            tr.translate(
+                                tx=view_pos_0[0],
+                                ty=view_pos_0[1],
+                                tz=0
+                            ),
+                            tr.rotationZ(theta_0)
+                        ])
+                    else:
+                        view_pos_t = get_pos(self.g_grid, self.g_size, None, self.tail[t + 1],
+                                             get_pos(self.g_grid, self.g_size, self.tail[t]), i=self.game.count,
+                                             m=self.game.time / self.game.dt)
+                        theta_t = get_theta(self.tail_angle[t], self.tail_angle[t + 1], i=self.game.count,
+                                            m=self.game.time / self.game.dt)
+                        piece.transform = tr.matmul([
+                            tr.translate(
+                                tx=view_pos_t[0],
+                                ty=view_pos_t[1],
+                                tz=0
+                            ),
+                            tr.rotationZ(theta_t)
+                        ])
+                    sg.drawSceneGraphNode(piece, pipeline)
 
     def update(self):
         if not self.game.pause:
@@ -267,8 +306,8 @@ class Snake(object):
 
     def collide(self):
         if not (self.game.win or self.game.pause):
-            if not self.pos[0] in set(range(0, self.g_size)) or \
-                    not self.pos[1] in set(range(0, self.g_size)) \
+            if (not self.pos[0] in set(range(0, self.g_size))) or\
+                    (not self.pos[1] in set(range(0, self.g_size)))\
                     or (self.pos in self.game.arc_pos)\
                     or (self.pos in self.tail):
                 self.dead()
@@ -276,8 +315,10 @@ class Snake(object):
                 self.eat()
 
     def eat(self):
-        self.tail = [None] + self.tail
-        self.tail_angle = [None] + self.tail_angle
+        add_pos = self.food.pos if self.tail == [] else self.tail[0]
+        self.tail = [add_pos] + self.tail
+        add_angle = self.theta if self.tail_angle == [] else self.tail_angle[0]    #?
+        self.tail_angle = [add_angle] + self.tail_angle
         self.food.update(self)
         self.game.count_food += 1
         self.bodySnake.new(self.pos, self.theta)
@@ -369,7 +410,8 @@ class Food(object):
 
     def __init__(self, game):
         self.game = game
-        self.pos = tuple(rd.randint(0, game.size - 1) for _ in range(2))
+        choice = self.game.empty
+        self.pos = rd.choice(list(choice))
         self.view_pos = get_pos(game.grid, game.size, self.pos)
         game.view_food = self.view_pos
 
@@ -829,12 +871,12 @@ def get_pos(grid, size, pos, next_pos=None, current=None, i=0, m=1):
                     + 2 * pos[t] * (-1) ** t)
             for t in range(2))
     else:
-        next_pos = tuple(
+        next = tuple(
             grid * ((size - 1) * (-1) ** (t + 1)
                     + 2 * next_pos[t] * (-1) ** t)
             for t in range(2))
         return tuple(
-            next_pos[t] * (i / m) + current[t] * (1 - i / m)
+            next[t] * (i / m) + current[t] * (1 - i / m)
             for t in range(2))
 
 
