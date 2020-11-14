@@ -13,10 +13,10 @@ if __name__ == '__main__':
     if not glfw.init():
         sys.exit()
 
-    width = int(1920 * 1)
-    height = int(1080 * 1)
+    width = int(1920 * 0.8)
+    height = int(1080 * 0.8)
     window = glfw.create_window(
-        width, height, 'Snake Game 3D; Autor: F. Urrutia V.', glfw.get_primary_monitor(), None)   # glfw.get_primary_monitor()
+        width, height, 'Snake Game 3D; Autor: F. Urrutia V.', None, None)   # glfw.get_primary_monitor()
 
     if not window:
         glfw.terminate()
@@ -85,12 +85,6 @@ if __name__ == '__main__':
 
             elif game.dead:
                 iW.draw(pipeline_tx_2d, game.time_pause, 'dead')
-                if game.time_pause < 2*np.pi:
-                    game.time_pause += 0.01
-                else:
-                    game.time_pause = 2*np.pi
-            elif game.speed:
-                iW.draw(pipeline_tx_2d, game.time_pause, 'speed')
                 if game.time_pause < 2*np.pi:
                     game.time_pause += 0.01
                 else:

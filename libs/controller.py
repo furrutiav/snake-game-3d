@@ -5,6 +5,7 @@
 from libs.models import *
 import glfw
 from typing import Union
+import sys
 
 
 class Controller(object):
@@ -47,37 +48,26 @@ class Controller(object):
             if key == glfw.KEY_SPACE:
                 self.game.update()
                 self.game.time_pause = 0
+            elif key == glfw.KEY_ESCAPE:
+                glfw.terminate()
+                sys.exit()
 
         elif self.game.dead:
             if key == glfw.KEY_SPACE:
                 self.game.update()
                 self.game.time_pause = 0
-            elif key == glfw.KEY_H:
-                self.game.dead = False
-                self.game.speed = True
-                self.game.time_pause = 0
-
-        elif self.game.speed:
-            if key == glfw.KEY_1:
-                self.game.set_speed(1.5)
-                self.game.update()
-                self.game.time_pause = 0
-
-            elif key == glfw.KEY_2:
-                self.game.set_speed(1)
-                self.game.update()
-                self.game.time_pause = 0
-
-            elif key == glfw.KEY_3:
-                self.game.set_speed(0.7)
-                self.game.update()
-                self.game.time_pause = 0
+            elif key == glfw.KEY_ESCAPE:
+                glfw.terminate()
+                sys.exit()
 
         elif self.game.win:
             if key == glfw.KEY_SPACE:
                 self.snake.dead()
                 self.game.update()
                 self.game.time_pause = 0
+            elif key == glfw.KEY_ESCAPE:
+                glfw.terminate()
+                sys.exit()
 
         else:
             if not self.game.lock:
@@ -117,13 +107,6 @@ class Controller(object):
 
             elif key == glfw.KEY_ESCAPE:
                 self.game.pause = True
-
-            elif key == glfw.KEY_1:
-                self.game.numb -= 1
-                print(self.game.numb)
-            elif key == glfw.KEY_2:
-                self.game.numb += 1
-                print(self.game.numb)
 
     def on_scroll(self, window, pos, action):
         self.game.numb += action*0.1

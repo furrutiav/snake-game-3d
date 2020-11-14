@@ -43,9 +43,6 @@ class Game(object):
         self.view_pos = None
         self.view_food = None
 
-    def set_speed(self, s):
-        self.time *= s
-
     def post_time(self, t0):
         self.dt = [0.005, (self.dt + t0 - self.t + 0.005) / 3, (self.dt + t0 - self.t) / 2][0]
         self.t = t0
@@ -691,8 +688,6 @@ class interactiveWindow(object):
                                         GL_NEAREST)
         gpu_winW_quad = es.toGPUShape(bs.createTextureQuad("libs/fig/win.png"), GL_REPEAT,
                                       GL_NEAREST)
-        gpu_speedW_quad = es.toGPUShape(bs.createTextureQuad("libs/fig/speed.png"), GL_REPEAT,
-                                        GL_NEAREST)
 
         deadW = sg.SceneGraphNode('deadW')
         deadW.transform = tr.uniformScale(1)
@@ -718,15 +713,7 @@ class interactiveWindow(object):
         winW_tr.transform = tr.identity()
         winW_tr.childs += [winW]
 
-        speedW = sg.SceneGraphNode('speedW')
-        speedW.transform = tr.uniformScale(1)
-        speedW.childs += [gpu_speedW_quad]
-
-        speedW_tr = sg.SceneGraphNode('speedW_tr')
-        speedW_tr.transform = tr.identity()
-        speedW_tr.childs += [speedW]
-
-        self.models = {'dead': deadW_tr, 'pause': pauseW_tr, 'win': winW_tr, 'speed': speedW_tr}
+        self.models = {'dead': deadW_tr, 'pause': pauseW_tr, 'win': winW_tr}
 
     def draw(self, pipeline, theta, mod):
         model = self.models[mod]
@@ -735,8 +722,7 @@ class interactiveWindow(object):
             tr.translate(
                 tx=0,
                 ty=0,
-                tz=0),
-            tr.rotationZ(theta)
+                tz=0)
         ])
         glUseProgram(pipeline.shaderProgram)
         sg.drawSceneGraphNode(model, pipeline, transformName='transform')
