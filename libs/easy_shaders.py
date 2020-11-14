@@ -50,7 +50,7 @@ def textureSimpleSetup(texture, imgName, wrapMode, filterMode):
         internalFormat = GL_RGBA
         format = GL_RGBA
     else:
-        print("Image mode not supported.")
+        print("Image mode not supported.", image.mode)
         raise Exception()
 
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.size[0], image.size[1], 0, format, GL_UNSIGNED_BYTE, img_data)

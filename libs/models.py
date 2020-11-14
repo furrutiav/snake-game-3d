@@ -79,6 +79,7 @@ class Snake(object):
         self.key = 0, 0
         self.next = tuple(sum(t) for t in zip(self.pos, self.dir))
         self.tail = []
+        self.tail_angle = []
         self.angle = {
             (0, 0): np.pi / 2,
             (-1, 0): np.pi / 2,
@@ -242,12 +243,14 @@ class Snake(object):
             self.game.lock = False
             self.tail.append(self.pos)
             self.tail.pop(0)
+            self.tail_angle.append(self.theta)
+            self.tail_angle.pop(0)
             self.dir = self.key
             self.pos = self.next
             self.next = tuple(sum(t) for t in zip(self.pos, self.dir))
             self.theta = self.new_theta
             self.current_pos = get_pos(self.g_grid, self.g_size, self.pos)
-            self.bodySnake.update(self.tail)
+            self.bodySnake.update(self.tail, self.tail_angle)
         if self.game.notFood:
             self.game.win = True
 
@@ -270,9 +273,10 @@ class Snake(object):
 
     def eat(self):
         self.tail = [None] + self.tail
+        self.tail_angle = [None] + self.tail_angle
         self.food.update(self)
         self.game.count_food += 1
-        self.bodySnake.new(self.pos)
+        self.bodySnake.new(self.pos, self.theta)
 
     def dead(self):
         self.pos = self.g_center
@@ -283,6 +287,7 @@ class Snake(object):
         self.next = tuple(sum(t) for t in zip(self.pos, self.dir))
         self.game.count_food = 0
         self.tail = []
+        self.tail_angle = []
         self.body.childs = [self.head]
         self.bodySnake.death()
         self.food.update(self)
@@ -296,7 +301,7 @@ class Snake(object):
 class bodyCreator(object):
     game: Union['Game', None]
 
-    def __init__(self, game, body, pos):
+    def __init__(self, game, body, pos, angle):
         self.game = game
         view_pos = get_pos(game.grid, game.size, pos)
 
@@ -312,11 +317,12 @@ class bodyCreator(object):
         body_sh.childs += [gpu_body_quad]
 
         body_sh_tr = sg.SceneGraphNode(f'body_sh_tr_{game.count_food}')
-        body_sh_tr.transform = tr.translate(
+        body_sh_tr.transform = tr.matmul([
+            tr.translate(
             tx=view_pos[0],
             ty=view_pos[1],
-            tz=0
-        )
+            tz=0),
+            tr.rotationZ(angle)])
         body_sh_tr.childs += [body_sh]
         body.childs = [body_sh_tr] + body.childs
 
@@ -324,12 +330,14 @@ class bodyCreator(object):
         self.g_grid = self.game.grid
         self.g_size = self.game.size
 
-    def update(self, pos):
+    def update(self, pos, angle):
         view_pos = get_pos(self.g_grid, self.g_size, pos)
-        self.model.transform = tr.translate(
+        self.model.transform = tr.matmul([
+            tr.translate(
             tx=view_pos[0],
             ty=view_pos[1],
-            tz=0)
+            tz=0),
+            tr.rotationZ(angle)])
 
 
 class bodySnake(object):
@@ -341,12 +349,12 @@ class bodySnake(object):
         self.body = snake.body
         self.list = []
 
-    def new(self, pos):
-        self.list.append(bodyCreator(self.game, self.body, pos))
+    def new(self, pos, angle):
+        self.list.append(bodyCreator(self.game, self.body, pos, angle))
 
-    def update(self, tail):
+    def update(self, tail, tail_angle):
         for i in range(self.game.count_food):
-            self.list[i].update(tail[i])
+            self.list[i].update(tail[i], tail_angle[i])
 
     def death(self):
         self.list = []
