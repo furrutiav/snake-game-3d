@@ -87,7 +87,6 @@ def toGPUShape(shape, wrapMode=None, filterMode=None):
     return gpuShape
 
 
-
 class SimpleShaderProgram:
 
     def __init__(self):

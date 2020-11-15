@@ -2,6 +2,9 @@
 """
 Daniel Calderon, CC3501, 2019-2
 vertices and indices for simple shapes
+
+F. Urrutia V., CC3501, 2020-1
+add createTextureQuad(REPEAT), createTextureNormalsQuad(REPEAT), read(OBJ)
 """
 
 

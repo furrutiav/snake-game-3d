@@ -1,5 +1,20 @@
 """
+F. Urrutia V., CC3501, 2020-1
 -----------> MODELS <-----------
+Modelos:
+-Game
+-Snake
+-body:
+--bodyCreator
+--bodySnake
+-Food
+-Background
+-interactiveWindow
+-Axis
+-Cam
+-funciones:
+--get_pos:  interpolacion posiciones
+--get_theta       ""      angulos
 """
 
 from libs import basic_shapes as bs, transformations as tr, easy_shaders as es, scene_graph as sg, \

@@ -1,5 +1,7 @@
 """
+F. Urrutia V., CC3501, 2020-1
 -----------> CONTROLLER <-----------
+        Control con el usuario
 """
 
 from libs.models import *
