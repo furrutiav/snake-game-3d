@@ -111,4 +111,3 @@ class Controller(object):
     def on_scroll(self, window, pos, action):
         self.game.numb = self.game.numb + action*0.001 if self.game.numb >= 0.001 or \
                                                           (self.game.numb == 0.0001 and action > 0) else 0.0001
-        # print(self.game.numb)

@@ -49,7 +49,7 @@ class Game(object):
 
     def post_time(self, t0):
         self.dt = \
-        [0.005, (self.dt + t0 - self.t + 0.011) / 3, (self.dt + t0 - self.t) / 2, t0 - self.t, self.numb + 0.005][4]
+        [0.005, (self.dt + t0 - self.t + 0.011) / 3, (self.dt + t0 - self.t) / 2, t0 - self.t, self.numb + 0.001][4]
         self.t = t0
 
     def check_time(self):
@@ -246,7 +246,7 @@ class Snake(object):
             glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
             glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
 
-            if k=='H':
+            if k =='H':
                 sg.drawSceneGraphNode(model, pipeline)
             else:
                 length = len(self.tail)
@@ -313,13 +313,13 @@ class Snake(object):
                     or (self.pos in self.game.arc_pos) \
                     or (self.pos in self.tail):
                 self.dead()
-            if self.pos==self.food.pos:
+            if self.pos == self.food.pos:
                 self.eat()
 
     def eat(self):
-        add_pos = self.food.pos if self.tail==[] else self.tail[0]
+        add_pos = self.food.pos if self.tail == [] else self.tail[0]
         self.tail = [add_pos] + self.tail
-        add_angle = self.theta if self.tail_angle==[] else self.tail_angle[0]  # ?
+        add_angle = self.theta if self.tail_angle == [] else self.tail_angle[0]
         self.tail_angle = [add_angle] + self.tail_angle
         self.food.update(self)
         self.game.count_food += 1
@@ -342,7 +342,7 @@ class Snake(object):
             self.game.dead = True
 
     def is_new_dir(self, k):
-        return sum([self.dir[i] * k[i] for i in range(2)])==0
+        return sum([self.dir[i] * k[i] for i in range(2)]) == 0
 
 
 class bodyCreator(object):
@@ -445,7 +445,6 @@ class Food(object):
                 tz=self.game.grid / 2),
             tr.rotationZ(1.5 * theta)
         ])
-        ctr = self.game.numb
         glUseProgram(pipeline.shaderProgram)
 
         # White light in all components: ambient, diffuse and specular.
@@ -507,7 +506,7 @@ class Food(object):
 
     def update(self, snake):
         choice = self.game.empty - set(snake.tail) - {snake.pos}
-        if choice!=set():
+        if choice != set():
             self.pos = rd.choice(list(choice))
             self.view_pos = get_pos(self.g_grid, self.g_size, self.pos)
             self.game.view_food = self.view_pos
