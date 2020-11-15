@@ -5,7 +5,6 @@ import glfw
 import sys
 from libs.models import *
 from libs.controller import Controller
-from time import time
 
 N = 20
 fullScreen = 0 if len(sys.argv) == 1 else 1 if int(sys.argv[1]) == 1 else 0
