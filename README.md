@@ -59,4 +59,4 @@ Códigos/code: CC 3501-1 - Primavera 2020
 No propietario / Librerías, Implementaciones, Base y Ejemplos, etc. Owner: Daniel Calderon, CC 3501, 2019-2
 ```
 ## Licencia
-Este proyecto está bajo la Licencia (MIT License) - mira el archivo [MIT](https://choosealicense.com/licenses/mit/) para detalles.
+Este proyecto está bajo la Licencia (GNU General Public License v3.0 License) - mira el archivo [GNU v3](https://www.gnu.org/licenses/gpl-3.0.html) para detalles.
